@@ -35,7 +35,7 @@ All notable public changes to SqlWorkflowMonitor are documented here. Stable rel
 - Added architecture, secure deployment, database versioning, and release-process documentation.
 - Added a repository verification script that rejects secrets, private tooling, licenses, ZIP files, and user-specific artifacts.
 
-### Documentation and commercial presentation
+### Documentation and release materials
 
 - Clarified the modular layered monolith architecture and companion Worker model.
 - Clarified that the public repository is proprietary source-available evaluation material, not open source.

@@ -146,7 +146,6 @@ public sealed class ExecutionDashboardController : Controller
     string sortDirection = "DESC",
     CancellationToken cancellationToken = default)
     {
-        // INICIO AGREGADO
         ProductAccessStatus productAccess =
             await _productAccess.GetStatusAsync(
                 cancellationToken);
@@ -163,12 +162,10 @@ public sealed class ExecutionDashboardController : Controller
                         "La licencia actual no permite exportar archivos CSV."
                 });
         }
-        // FIN AGREGADO
 
         (sortBy, sortDirection) =
             ValidateSort(sortBy, sortDirection);
 
-        // El resto del método queda igual.
 
         List<ExecutionListItemDto> executions =
        await _repository.GetForExportAsync(

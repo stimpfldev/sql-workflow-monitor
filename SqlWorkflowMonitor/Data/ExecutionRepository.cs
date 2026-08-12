@@ -1,4 +1,4 @@
-﻿using System.Data;
+using System.Data;
 using Microsoft.Data.SqlClient;
 using SqlWorkflowMonitor.DTOs;
 
@@ -346,7 +346,6 @@ public sealed class ExecutionRepository
         command.Parameters
             .Add("@PageSize", SqlDbType.Int)
             .Value = pageSize;
-        /* INICIO AGREGADO: ordenamiento */
 
         command.Parameters
             .Add("@SortBy", SqlDbType.VarChar, 20)
@@ -356,7 +355,6 @@ public sealed class ExecutionRepository
             .Add("@SortDirection", SqlDbType.VarChar, 4)
             .Value = sortDirection;
 
-        /* FIN AGREGADO */
 
         command.Parameters
             .Add("@StaleThresholdMinutes", SqlDbType.Int)

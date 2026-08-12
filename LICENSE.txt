@@ -1,19 +1,46 @@
-PROPRIETARY SOFTWARE NOTICE
+SQLWORKFLOWMONITOR SOURCE-AVAILABLE EVALUATION LICENSE NOTICE
+Version 1.1 — August 5, 2026
 
-Copyright (c) 2026 Federico Stimpfl.
-All rights reserved.
+Copyright (c) 2026 Federico Stimpfl. All rights reserved.
 
-This software, its source code, database scripts,
-documentation, architecture, and associated materials
-are proprietary and confidential.
+SqlWorkflowMonitor, including its source code, database scripts, documentation,
+architecture, user interface, and associated materials, is proprietary software.
+It is made publicly viewable for technical review, non-production evaluation,
+defect reporting, and authorized evaluation under this license.
+It is not open-source software and no OSI-approved license applies.
 
-No permission is granted to copy, modify, distribute,
-publish, sublicense, sell, reverse engineer, or use this
-software or any substantial portion of it without prior
-written authorization from the copyright owner.
+Subject to this notice, you may:
 
-Access to this repository or possession of a copy does not
-grant any license or ownership rights.
+1. view the materials in this repository;
+2. clone one local copy solely to inspect, build, and run the Demo in a
+   non-production evaluation environment; and
+3. submit issues or proposed changes through this repository.
 
-For licensing or commercial inquiries, contact the
-copyright owner.
+You may not, without prior written authorization from Federico Stimpfl:
+
+1. use the Software in production or to provide a service to any third party;
+2. copy or distribute the Software except for the single evaluation copy above;
+3. publish, sublicense, sell, rent, host, or commercially exploit the Software;
+4. modify or create derivative works except as part of a proposed contribution
+   submitted to this repository;
+5. remove, bypass, disable, or alter licensing, capacity, expiration, authorship,
+   or ownership controls;
+6. use the Software or its source to build, train, benchmark, or provide a
+   substantially similar competing product or service; or
+7. use any private signing key, issued license, customer configuration, or other
+   material not expressly included in this public repository.
+
+Executable Demo or commercial distributions may also be governed by the
+applicable End User License Agreement. Third-party components retain their own
+licenses as listed in Legal/THIRD-PARTY-NOTICES.txt.
+
+THE SOFTWARE IS PROVIDED FOR EVALUATION "AS IS", WITHOUT WARRANTY OF ANY KIND,
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW. THIS NOTICE DOES NOT LIMIT
+RIGHTS THAT CANNOT LAWFULLY BE EXCLUDED.
+
+Access to the repository does not transfer ownership. All rights not expressly
+granted above are reserved.
+
+Commercial licensing and written permissions:
+federicosdev@gmail.com
+https://www.federicostimpfl.com.ar

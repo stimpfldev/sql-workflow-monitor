@@ -1,26 +1,43 @@
-﻿using System.Net.Mail;
+using System.Net.Mail;
+using Microsoft.Extensions.Options;
+using SqlWorkflowMonitor.Worker.Configuration;
 using SqlWorkflowMonitor.Worker.Models;
 
 namespace SqlWorkflowMonitor.Worker.Services;
 
 public sealed class CustomerCsvProcessor
 {
+    private readonly CsvImportOptions _options;
+
+    public CustomerCsvProcessor(
+        IOptions<CsvImportOptions> options)
+    {
+        _options = options.Value;
+    }
+
     public async Task<List<StagingCustomer>> ReadAndValidateAsync(
         string filePath,
         CancellationToken cancellationToken)
     {
-        if (!File.Exists(filePath))
+        var file = new FileInfo(filePath);
+
+        if (!file.Exists)
         {
             throw new FileNotFoundException(
                 "No se encontró el archivo CSV.",
                 filePath);
         }
 
+        if (file.Length > _options.MaxFileSizeBytes)
+        {
+            throw new InvalidDataException(
+                $"El archivo CSV supera el máximo configurado de {_options.MaxFileSizeBytes} bytes.");
+        }
+
         var customers = new List<StagingCustomer>();
 
         using var reader = new StreamReader(filePath);
 
-        // Lee el encabezado.
         string? header =
             await reader.ReadLineAsync(cancellationToken);
 
@@ -60,7 +77,12 @@ public sealed class CustomerCsvProcessor
                 continue;
             }
 
-            // Separa Name y Email.
+            if (customers.Count >= _options.MaxRows)
+            {
+                throw new InvalidDataException(
+                    $"El archivo CSV supera el máximo configurado de {_options.MaxRows} registros.");
+            }
+
             string[] columns = line.Split(',', 2);
 
             string? name = columns.Length >= 1
@@ -100,7 +122,6 @@ public sealed class CustomerCsvProcessor
                 Name = name,
                 Email = email,
                 IsValid = errors.Count == 0,
-
                 ValidationError = errors.Count == 0
                     ? null
                     : $"Línea {lineNumber}: " +

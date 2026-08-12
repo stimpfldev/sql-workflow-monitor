@@ -1,10 +1,10 @@
-﻿THIRD-PARTY NOTICES
+THIRD-PARTY NOTICES
 SQLWORKFLOWMONITOR
 
 Product: SqlWorkflowMonitor
-Product version: 1.1.0
+Product version: 1.1.1
 Runtime: .NET 10, win-x64, self-contained
-Copyright Â© 2026 Federico Stimpfl. All rights reserved.
+Copyright © 2026 Federico Stimpfl. All rights reserved.
 
 This product includes third-party software components. Those components remain
 the property of their respective copyright holders and are distributed under
@@ -25,12 +25,12 @@ not distributed with the commercial product.
 1. DIRECT NUGET DEPENDENCIES
 ===============================================================================
 
-- Microsoft.AspNetCore.OpenApi 10.0.9
+- Microsoft.AspNetCore.OpenApi 10.0.10
 - Microsoft.Data.SqlClient 7.0.2
 - Microsoft.Extensions.Hosting 10.0.10
 - Microsoft.Extensions.Hosting.WindowsServices 10.0.10
 - Microsoft.Extensions.Http 10.0.10
-- Microsoft.OpenApi 2.7.5
+- Microsoft.OpenApi 2.11.0
 - Swashbuckle.AspNetCore.SwaggerUI 10.2.3
 
 ===============================================================================

@@ -1,4 +1,4 @@
-﻿using SqlWorkflowMonitor.Data;
+using SqlWorkflowMonitor.Data;
 using SqlWorkflowMonitor.Licensing.Models;
 using SqlWorkflowMonitor.Licensing.Services;
 using SqlWorkflowMonitor.Models;
@@ -55,7 +55,6 @@ public sealed class ProductAccessService
         return new ProductAccessStatus
         {
             Edition = license?.Edition ?? "Invalid",
-            // INICIO AGREGADO - Estado de la licencia
             IsDemo = false,
 
             IsInGracePeriod =
@@ -71,7 +70,6 @@ public sealed class ProductAccessService
 
             AccessError =
     validation.Error,
-            // FIN AGREGADO
 
             InstalledAtUtc =
                 currentUsage.InstalledAtUtc,
@@ -129,7 +127,7 @@ public sealed class ProductAccessService
         if (!validation.CanStartExecutions ||
             validation.License is null)
         {
-            throw new InvalidOperationException(
+            throw new ProductAccessDeniedException(
                 validation.Error ??
                 "La licencia no permite iniciar nuevas ejecuciones.");
         }

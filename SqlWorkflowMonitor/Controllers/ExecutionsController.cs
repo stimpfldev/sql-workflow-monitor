@@ -1,5 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Data.SqlClient;
 using SqlWorkflowMonitor.Data;
 using SqlWorkflowMonitor.Services;
@@ -14,13 +15,14 @@ using SqlWorkflowMonitor.Security;
 [Authorize(
     AuthenticationSchemes =
         ApiKeyAuthenticationHandler.SchemeName)]
+[EnableRateLimiting("api")]
 public sealed class ExecutionsController : ControllerBase
 {
     private static readonly string[] AllowedFinalStatuses =
     [
         "Succeeded",
         "Failed",
-           "Cancelled"
+        "Cancelled"
     ];
 
     private readonly ExecutionRepository _repository;
@@ -66,6 +68,17 @@ public sealed class ExecutionsController : ControllerBase
 
             return Ok(response);
         }
+        catch (ProductAccessDeniedException exception)
+        {
+            return StatusCode(
+                StatusCodes.Status403Forbidden,
+                new ProblemDetails
+                {
+                    Status = StatusCodes.Status403Forbidden,
+                    Title = "Acceso de producto restringido.",
+                    Detail = exception.Message
+                });
+        }
         catch (SqlException ex)
             when (ex.Number == 50001)
         {
@@ -88,7 +101,7 @@ public sealed class ExecutionsController : ControllerBase
                     Detail = ex.Message
                 });
         }
-    } // Cierra el método Start
+    }
 
     [HttpPost("{executionId:long}/finish")]
     [ProducesResponseType(
@@ -163,7 +176,7 @@ public sealed class ExecutionsController : ControllerBase
 
             return NoContent();
         }
-        catch (Microsoft.Data.SqlClient.SqlException ex)
+        catch (SqlException ex)
             when (ex.Number == 50002
                || ex.Number == 50003
                || ex.Number == 50004)
@@ -175,7 +188,7 @@ public sealed class ExecutionsController : ControllerBase
                 Detail = ex.Message
             });
         }
-    } // FIN DEL MÉTODO Finish
+    }
 
     [HttpGet]
     [ProducesResponseType<List<ExecutionListItemDto>>(
@@ -204,11 +217,11 @@ public sealed class ExecutionsController : ControllerBase
     [FromQuery] int olderThanMinutes = 30,
     CancellationToken cancellationToken = default)
     {
-        if (olderThanMinutes <= 0)
+        if (olderThanMinutes is <= 0 or > 525_600)
         {
             ModelState.AddModelError(
                 nameof(olderThanMinutes),
-                "La cantidad de minutos debe ser mayor que cero.");
+                "La cantidad de minutos debe estar entre 1 y 525600.");
 
             return ValidationProblem(ModelState);
         }

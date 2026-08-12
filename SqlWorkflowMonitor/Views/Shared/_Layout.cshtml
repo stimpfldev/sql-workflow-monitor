@@ -1,4 +1,4 @@
-﻿@using System.Globalization
+@using System.Globalization
 @inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
 
 @{
@@ -17,7 +17,6 @@
 
     <title>@ViewData["Title"] - SqlWorkflowMonitor</title>
 
-    <script type="importmap"></script>
 
     <link rel="stylesheet"
           href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
@@ -159,9 +158,6 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js">
     </script>
 
-    <script src="~/js/site.js"
-            asp-append-version="true">
-    </script>
 
     @await RenderSectionAsync(
         "Scripts",

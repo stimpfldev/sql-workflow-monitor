@@ -9,7 +9,6 @@ public sealed class ProductAccessStatus
     public DateTime ExpiresAtUtc { get; init; }
 
     public bool IsExpired { get; init; }
-    // INICIO AGREGADO - Estado detallado del acceso
     public bool IsDemo { get; init; } = true;
 
     public bool IsInGracePeriod { get; init; }
@@ -19,7 +18,6 @@ public sealed class ProductAccessStatus
     public bool IsExpiringSoon { get; init; }
 
     public string? AccessError { get; init; }
-    // FIN AGREGADO
 
     public int DaysRemaining { get; init; }
 

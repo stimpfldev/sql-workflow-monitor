@@ -3,6 +3,9 @@
    Ejecutar sobre la base SqlWorkflowMonitor_Dev
    ========================================================= */
 
+USE SqlWorkflowMonitor_Dev;
+GO
+
 
 /* 1. Running no puede tener FinishedAt.
       Los estados finales deben tener FinishedAt. */

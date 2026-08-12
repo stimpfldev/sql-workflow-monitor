@@ -171,7 +171,6 @@ BEGIN
     ORDER BY e.ExecutionId DESC;
 END;
 GO
-/* INICIO AGREGADO */
 
 /* Lista ejecuciones que permanecen en Running demasiado tiempo */
 DROP PROCEDURE IF EXISTS dbo.sp_ProcessExecution_ListStuck
@@ -216,7 +215,6 @@ BEGIN
 END;
 GO
 
-/* FIN AGREGADO */
 
 USE SqlWorkflowMonitor_Dev;
 GO

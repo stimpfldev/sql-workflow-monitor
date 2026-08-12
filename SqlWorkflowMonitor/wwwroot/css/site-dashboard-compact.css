@@ -279,3 +279,13 @@ body {
     width: 100%;
   }
 }
+
+.license-grace-alert {
+    color: #7a3e00;
+    background-color: #ffe5b4;
+    border-color: #fd7e14;
+}
+
+.sortable-link {
+    cursor: pointer;
+}

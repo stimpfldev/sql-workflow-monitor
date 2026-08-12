@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Localization;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace SqlWorkflowMonitor.Controllers;
 
-public class LanguageController : Controller
+[Route("language")]
+public sealed class LanguageController : Controller
 {
-    [HttpPost]
+    [HttpPost("set")]
     [ValidateAntiForgeryToken]
     public IActionResult SetLanguage(
         string culture,
@@ -22,6 +23,11 @@ public class LanguageController : Controller
             culture = "es-AR";
         }
 
+        if (!Url.IsLocalUrl(returnUrl))
+        {
+            returnUrl = "/executions";
+        }
+
         Response.Cookies.Append(
             CookieRequestCultureProvider.DefaultCookieName,
             CookieRequestCultureProvider.MakeCookieValue(
@@ -30,6 +36,8 @@ public class LanguageController : Controller
             {
                 Expires = DateTimeOffset.UtcNow.AddYears(1),
                 IsEssential = true,
+                HttpOnly = true,
+                Secure = Request.IsHttps,
                 SameSite = SameSiteMode.Lax
             });
 

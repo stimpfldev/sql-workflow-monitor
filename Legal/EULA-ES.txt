@@ -1,7 +1,7 @@
 ACUERDO DE LICENCIA DE USUARIO FINAL
 SQLWORKFLOWMONITOR
 
-Versión del documento: Borrador 1.0
+Versión del documento: 1.1
 Producto: SqlWorkflowMonitor
 Titular: Federico Stimpfl
 Copyright © 2026 Federico Stimpfl. Todos los derechos reservados.
@@ -440,7 +440,7 @@ Producto:
 SqlWorkflowMonitor
 
 Correo de soporte o contacto:
-[PENDIENTE DE DEFINIR]
+federicosdev@gmail.com
 
 Sitio web:
 https://www.federicostimpfl.com.ar
@@ -452,6 +452,6 @@ La instalación, activación o utilización del Software implica la aceptación
 de este Acuerdo por parte del Licenciatario.
 
 Fecha de última actualización:
-[PENDIENTE DE DEFINIR]
+5 de agosto de 2026
 
 FIN DEL ACUERDO

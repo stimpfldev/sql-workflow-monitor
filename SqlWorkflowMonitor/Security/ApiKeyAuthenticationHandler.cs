@@ -1,4 +1,4 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Text.Encodings.Web;
@@ -13,26 +13,23 @@ public sealed class ApiKeyAuthenticationHandler
     public const string SchemeName = "ApiKey";
     public const string HeaderName = "X-Api-Key";
 
-    private const string ConfigurationKey =
-        "Security:ApiKey";
-
-    private readonly IConfiguration _configuration;
+    private readonly IOptionsMonitor<SecurityOptions> _securityOptions;
 
     public ApiKeyAuthenticationHandler(
         IOptionsMonitor<AuthenticationSchemeOptions> options,
         ILoggerFactory logger,
         UrlEncoder encoder,
-        IConfiguration configuration)
+        IOptionsMonitor<SecurityOptions> securityOptions)
         : base(options, logger, encoder)
     {
-        _configuration = configuration;
+        _securityOptions = securityOptions;
     }
 
     protected override Task<AuthenticateResult>
         HandleAuthenticateAsync()
     {
-        string? configuredApiKey =
-            _configuration[ConfigurationKey];
+        string configuredApiKey =
+            _securityOptions.CurrentValue.ApiKey;
 
         if (string.IsNullOrWhiteSpace(configuredApiKey))
         {

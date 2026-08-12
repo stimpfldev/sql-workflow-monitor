@@ -1,48 +1,50 @@
+using Microsoft.Extensions.Options;
 using SqlWorkflowMonitor.Worker;
+using SqlWorkflowMonitor.Worker.Configuration;
 using SqlWorkflowMonitor.Worker.Data;
 using SqlWorkflowMonitor.Worker.Services;
 
 var builder = Host.CreateApplicationBuilder(args);
+
+WorkerConfigurationValidator.Validate(builder.Configuration);
 
 builder.Services.AddWindowsService(options =>
 {
     options.ServiceName = "SqlWorkflowMonitor Worker";
 });
 
-string baseUrl =
-    builder.Configuration["WorkflowMonitorApi:BaseUrl"]
-    ?? throw new InvalidOperationException(
-        "No se encontró WorkflowMonitorApi:BaseUrl.");
+builder.Services.Configure<WorkflowMonitorApiOptions>(
+    builder.Configuration.GetSection(
+        WorkflowMonitorApiOptions.SectionName));
 
-string apiKey =
-    builder.Configuration["WorkflowMonitorApi:ApiKey"]
-    ?? throw new InvalidOperationException(
-        "No se encontró WorkflowMonitorApi:ApiKey.");
+builder.Services.Configure<CsvImportOptions>(
+    builder.Configuration.GetSection(
+        CsvImportOptions.SectionName));
 
-if (string.IsNullOrWhiteSpace(apiKey))
-{
-    throw new InvalidOperationException(
-        "WorkflowMonitorApi:ApiKey no puede estar vacía.");
-}
+builder.Services.Configure<WorkerIdentityOptions>(
+    builder.Configuration.GetSection(
+        WorkerIdentityOptions.SectionName));
 
 builder.Services.AddHttpClient(
     "WorkflowMonitorApi",
-    client =>
+    (serviceProvider, client) =>
     {
-        client.BaseAddress = new Uri(baseUrl);
+        WorkflowMonitorApiOptions options =
+            serviceProvider
+                .GetRequiredService<
+                    IOptions<WorkflowMonitorApiOptions>>()
+                .Value;
 
+        client.BaseAddress = new Uri(options.BaseUrl);
+        client.Timeout = TimeSpan.FromSeconds(
+            options.TimeoutSeconds);
         client.DefaultRequestHeaders.Add(
             "X-Api-Key",
-            apiKey);
+            options.ApiKey);
     });
 
 builder.Services.AddSingleton<CustomerCsvProcessor>();
-
-builder.Services.AddSingleton<
-    StagingCustomerRepository>();
-
+builder.Services.AddSingleton<StagingCustomerRepository>();
 builder.Services.AddHostedService<Worker>();
 
-var host = builder.Build();
-
-host.Run();
+await builder.Build().RunAsync();

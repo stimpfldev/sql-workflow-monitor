@@ -1,11 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using SqlWorkflowMonitor.Data;
 
 namespace SqlWorkflowMonitor.Controllers;
 
 [ApiController]
 [Route("api/health")]
+[EnableRateLimiting("health")]
 public sealed class HealthController : ControllerBase
 {
     private readonly ExecutionRepository _repository;
@@ -39,7 +40,12 @@ public sealed class HealthController : ControllerBase
                 checkedAtUtc = DateTime.UtcNow
             });
         }
-        catch (SqlException exception)
+        catch (OperationCanceledException)
+            when (cancellationToken.IsCancellationRequested)
+        {
+            throw;
+        }
+        catch (Exception exception)
         {
             _logger.LogError(
                 exception,

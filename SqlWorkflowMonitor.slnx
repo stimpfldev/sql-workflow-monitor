@@ -1,15 +1,54 @@
 <Solution>
+  <Folder Name="/Documentation/">
+    <File Path="docs/ARCHITECTURE.md" />
+    <File Path="docs/RELEASE-PROCESS.md" />
+    <File Path="docs/SECURITY-DEPLOYMENT.md" />
+  </Folder>
   <Folder Name="/Legal/">
-    <File Path="EULA-ES.txt" />
     <File Path="Legal/EULA-EN.txt" />
-    <File Path="Legal/packages.json" />
+    <File Path="Legal/EULA-ES.txt" />
+    <File Path="Legal/README.md" />
     <File Path="Legal/THIRD-PARTY-NOTICES.txt" />
+  </Folder>
+  <Folder Name="/Repository/">
+    <File Path=".editorconfig" />
+    <File Path=".gitattributes" />
+    <File Path=".gitignore" />
+    <File Path="CONTRIBUTING.md" />
+    <File Path="Directory.Build.props" />
+  </Folder>
+  <Folder Name="/Scripts/">
+    <File Path="scripts/Build-InstallSql.ps1" />
+    <File Path="scripts/Configure-Development.ps1" />
+    <File Path="scripts/Verify-PublicRepository.ps1" />
   </Folder>
   <Folder Name="/Solution Items/">
     <File Path="AUTHORSHIP.md" />
+    <File Path="CHANGELOG.md" />
     <File Path="LICENSE.txt" />
     <File Path="README.md" />
+    <File Path="RELEASE-NOTES.md" />
+    <File Path="SECURITY.md" />
+    <File Path="SUPPORT.md" />
+    <File Path="VERSION.txt" />
   </Folder>
-  <Project Path="SqlWorkflowMonitor.Worker/SqlWorkflowMonitor.Worker.csproj" Id="6298ba48-88f4-4827-b72a-8624194a8366" />
+  <Folder Name="/SQL Database as Code/">
+    <File Path="SqlWorkflowMonitor/SqlScripts/README.md" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/Install.sql" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/001_CreateDatabase.sql" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/002_CreateTables.sql" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/003_CreateProcedures.sql" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/004_SeedData.sql" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/005_AddExecutionConsistencyChecks.sql" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/006_AddExecutionMetricsChecks.sql" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/007_AddCsvExport.sql" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/008_AddDemoRestrictions.sql" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/009_AddLicensingInstallationId.sql" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/010_GetLicenseValidationContext.sql" />
+    <File Path="SqlWorkflowMonitor/SqlScripts/011_AddLicensedProductAccess.sql" />
+  </Folder>
+  <Project Path="SqlWorkflowMonitor.Worker/SqlWorkflowMonitor.Worker.csproj"
+           Id="6298ba48-88f4-4827-b72a-8624194a8366" />
+  <Project Path="SqlWorkflowMonitor.Tests.Unit/SqlWorkflowMonitor.Tests.Unit.csproj" />
   <Project Path="SqlWorkflowMonitor/SqlWorkflowMonitor.csproj" />
 </Solution>

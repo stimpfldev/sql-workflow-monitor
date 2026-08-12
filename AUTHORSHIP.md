@@ -1,41 +1,43 @@
-# DeclaraciÃ³n de autorÃ­a y titularidad
+# Authorship and ownership declaration
 
-## IdentificaciÃ³n de la obra
+## Work identification
 
-- Nombre: SqlWorkflowMonitor
-- Tipo de obra: software
-- Autor: Federico Stimpfl
-- Titular: Federico Stimpfl
-- PaÃ­s: Argentina
-- Repositorio pÃºblico: pendiente de publicaciÃ³n
+- Product: **SqlWorkflowMonitor**
+- Work type: proprietary software and associated documentation
+- Author and owner: **Federico Stimpfl**
+- Country: Argentina
+- Public repository: `https://github.com/stimpfldev/sql-workflow-monitor`
 
-## Primera versiÃ³n registrada en Git
+## Initial Git evidence
 
-- Fecha: 14 de julio de 2026
-- Commit: `05875f5a1c32c9f0063a07aaf30869ff10703b32`
-- Autor Git: `stimpfldev`
+- First recorded version: July 14, 2026
+- Initial commit: `05875f5a1c32c9f0063a07aaf30869ff10703b32`
+- Git author: `stimpfldev`
 
-## VersiÃ³n estable actual
+## Current source version
 
-- VersiÃ³n: `1.1.0`
-- Estado: release tÃ©cnica cerrada
-- Componentes principales: aplicaciÃ³n web, API, Worker Service, SQL Server, licenciamiento, seguridad, documentaciÃ³n e instalaciÃ³n validada
+- Version: `1.1.1`
+- Components: ASP.NET Core Web/API, MVC dashboard, Worker Service, SQL Server scripts and stored procedures, authentication, security controls, offline licensing verification, documentation, and release tooling
+- Architecture: modular layered monolith with a companion Worker Service and shared SQL Server database
 
-## DescripciÃ³n
+## Scope of the public repository
 
-SqlWorkflowMonitor es una aplicaciÃ³n creada para registrar, monitorear y diagnosticar ejecuciones de procesos tÃ©cnicos, procesos batch y workflows de datos.
+The public repository contains selected source and product materials for technical review, non-production evaluation, defect reporting, and authorized use under the repository license.
 
-La soluciÃ³n incluye una API ASP.NET Core, un dashboard web, un Worker Service, integraciÃ³n con SQL Server, procesamiento de archivos, mÃ©tricas operativas, health checks, logging, autenticaciÃ³n administrativa, protecciÃ³n por API key y manejo controlado de errores.
+It intentionally excludes:
 
-## DeclaraciÃ³n
+- the private license generator;
+- private signing keys;
+- customer license files;
+- customer or production configuration;
+- Professional and Enterprise release packages;
+- internal commercial and release credentials;
+- other material not approved for publication.
 
-Federico Stimpfl declara ser el autor y titular original del cÃ³digo fuente, scripts de base de datos, documentaciÃ³n, arquitectura y materiales propios que integran SqlWorkflowMonitor.
+## Declaration
 
-Las bibliotecas, frameworks y componentes de terceros conservan sus respectivas licencias y derechos.
+Federico Stimpfl declares authorship and original ownership of the proprietary code, database scripts, documentation, architecture, branding, and original materials that form SqlWorkflowMonitor, except for third-party frameworks, libraries, and components, which remain subject to their respective licenses and ownership.
 
-El acceso al repositorio o a una copia del software no concede permiso para copiar, modificar, distribuir, publicar, sublicenciar, vender o utilizar comercialmente la obra.
+Public access does not transfer ownership and does not convert the product into open-source software. Authorized evaluation is governed by [LICENSE.txt](LICENSE.txt); executable distributions may also be governed by the applicable EULA.
 
-Cualquier autorizaciÃ³n deberÃ¡ otorgarse previamente y por escrito por el titular.
-
-Copyright (c) 2026 Federico Stimpfl.
-All rights reserved.
+Copyright (c) 2026 Federico Stimpfl. All rights reserved.

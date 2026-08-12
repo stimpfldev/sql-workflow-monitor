@@ -1,7 +1,7 @@
 END USER LICENSE AGREEMENT
 SQLWORKFLOWMONITOR
 
-Document version: Draft 1.0
+Document version: 1.1
 Product: SqlWorkflowMonitor
 Owner: Federico Stimpfl
 Copyright © 2026 Federico Stimpfl. All rights reserved.
@@ -429,7 +429,7 @@ Product:
 SqlWorkflowMonitor
 
 Support or contact email:
-[TO BE DEFINED]
+federicosdev@gmail.com
 
 Website:
 https://www.federicostimpfl.com.ar
@@ -441,6 +441,6 @@ Installation, activation, or use of the Software constitutes the Licensee’s
 acceptance of this Agreement.
 
 Last updated:
-[TO BE DEFINED]
+August 5, 2026
 
 END OF AGREEMENT

@@ -1,34 +1,34 @@
-@baseUrl = http://localhost:5263
+@baseUrl = https://localhost:7072
+@apiKey = REPLACE_WITH_A_32_CHARACTER_MINIMUM_API_KEY
 @processId = 1
 @workerId = CustomerCsvWorker
-@executionId = 36
+@executionId = 1
 
-### 1. Health check
+### Health check (public)
 GET {{baseUrl}}/api/health
 Accept: application/json
 
-### 2. Listar ejecuciones
+### List executions
 GET {{baseUrl}}/api/executions
 Accept: application/json
+X-Api-Key: {{apiKey}}
 
-### 3. Iniciar ejecución
+### Start execution
 POST {{baseUrl}}/api/executions/start
 Content-Type: application/json
 Accept: application/json
+X-Api-Key: {{apiKey}}
 
 {
   "processId": {{processId}},
   "workerId": "{{workerId}}"
 }
 
-### IMPORTANTE
-### Copiar el executionId devuelto arriba
-### y reemplazar el valor de @executionId.
-
-### 4. Finalizar ejecución exitosamente
+### Finish execution
 POST {{baseUrl}}/api/executions/{{executionId}}/finish
 Content-Type: application/json
 Accept: application/json
+X-Api-Key: {{apiKey}}
 
 {
   "status": "Succeeded",
@@ -39,10 +39,12 @@ Accept: application/json
   "affectedRows": 10
 }
 
-### 5. Consultar detalle
+### Execution detail
 GET {{baseUrl}}/api/executions/{{executionId}}
 Accept: application/json
+X-Api-Key: {{apiKey}}
 
-### 6. Consultar ejecuciones trabadas
+### Stuck executions
 GET {{baseUrl}}/api/executions/stuck?olderThanMinutes=30
 Accept: application/json
+X-Api-Key: {{apiKey}}

@@ -154,7 +154,6 @@ public sealed class ProductAccessRepository
                 new DateTimeOffset(currentUtc)
         };
     }
-    // INICIO AGREGADO
     public async Task ValidateAndRegisterStartAsync(
         int processId,
         string workerId,
@@ -201,5 +200,4 @@ public sealed class ProductAccessRepository
         await command.ExecuteNonQueryAsync(
             cancellationToken);
     }
-    // FIN AGREGADO
 }

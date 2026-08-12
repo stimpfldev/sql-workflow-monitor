@@ -1,6 +1,8 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
+using Microsoft.Extensions.Options;
+using SqlWorkflowMonitor.Worker.Configuration;
 using SqlWorkflowMonitor.Worker.Data;
 using SqlWorkflowMonitor.Worker.Models;
 using SqlWorkflowMonitor.Worker.Services;
@@ -13,29 +15,29 @@ public sealed class Worker : BackgroundService
     private readonly IHttpClientFactory _httpClientFactory;
     private readonly CustomerCsvProcessor _csvProcessor;
     private readonly StagingCustomerRepository _repository;
-    private readonly IConfiguration _configuration;
+    private readonly CsvImportOptions _csvOptions;
+    private readonly WorkerIdentityOptions _workerOptions;
 
     public Worker(
         ILogger<Worker> logger,
         IHttpClientFactory httpClientFactory,
         CustomerCsvProcessor csvProcessor,
         StagingCustomerRepository repository,
-        IConfiguration configuration)
+        IOptions<CsvImportOptions> csvOptions,
+        IOptions<WorkerIdentityOptions> workerOptions)
     {
         _logger = logger;
         _httpClientFactory = httpClientFactory;
         _csvProcessor = csvProcessor;
         _repository = repository;
-        _configuration = configuration;
+        _csvOptions = csvOptions.Value;
+        _workerOptions = workerOptions.Value;
     }
 
     protected override async Task ExecuteAsync(
         CancellationToken stoppingToken)
     {
-        int intervalSeconds =
-            _configuration.GetValue<int?>(
-                "CsvImport:IntervalSeconds")
-            ?? 60;
+        int intervalSeconds = _csvOptions.IntervalSeconds;
 
         while (!stoppingToken.IsCancellationRequested)
         {
@@ -73,30 +75,12 @@ public sealed class Worker : BackgroundService
     private async Task ProcessFileIfExistsAsync(
         CancellationToken cancellationToken)
     {
-        string inputFolder =
-            GetRequiredSetting("CsvImport:InputFolder");
-
-        string processedFolder =
-            GetRequiredSetting("CsvImport:ProcessedFolder");
-
-        string errorFolder =
-            GetRequiredSetting("CsvImport:ErrorFolder");
-
-        string fileName =
-            GetRequiredSetting("CsvImport:FileName");
-
-        int processId =
-            _configuration.GetValue<int>(
-                "CsvImport:ProcessId");
-
-        string workerId =
-            GetRequiredSetting("Worker:Id");
-
-        if (processId <= 0)
-        {
-            throw new InvalidOperationException(
-                "CsvImport:ProcessId debe ser mayor que cero.");
-        }
+        string inputFolder = _csvOptions.InputFolder;
+        string processedFolder = _csvOptions.ProcessedFolder;
+        string errorFolder = _csvOptions.ErrorFolder;
+        string fileName = _csvOptions.FileName;
+        int processId = _csvOptions.ProcessId;
+        string workerId = _workerOptions.Id;
 
         Directory.CreateDirectory(inputFolder);
         Directory.CreateDirectory(processedFolder);
@@ -105,11 +89,24 @@ public sealed class Worker : BackgroundService
         string filePath =
             Path.Combine(inputFolder, fileName);
 
-        // 1. Buscar customers.csv
         if (!File.Exists(filePath))
         {
             _logger.LogInformation(
                 "No se encontró el archivo {FileName}.",
+                fileName);
+
+            return;
+        }
+
+        var fileInfo = new FileInfo(filePath);
+        TimeSpan fileAge =
+            DateTime.UtcNow - fileInfo.LastWriteTimeUtc;
+
+        if (fileAge < TimeSpan.FromSeconds(
+                _csvOptions.MinimumFileAgeSeconds))
+        {
+            _logger.LogInformation(
+                "El archivo {FileName} todavía puede estar siendo escrito. Se reintentará en el próximo ciclo.",
                 fileName);
 
             return;
@@ -123,7 +120,6 @@ public sealed class Worker : BackgroundService
 
         try
         {
-            // 2. Iniciar la ejecución mediante la API
             executionId = await StartExecutionAsync(
                 client,
                 processId,
@@ -134,7 +130,6 @@ public sealed class Worker : BackgroundService
                 "Ejecución {ExecutionId} iniciada.",
                 executionId);
 
-            // 3 y 4. Leer y validar CSV
             List<StagingCustomer> customers =
                 await _csvProcessor.ReadAndValidateAsync(
                     filePath,
@@ -147,7 +142,6 @@ public sealed class Worker : BackgroundService
             int invalidCount =
                 customers.Count - validCount;
 
-            // 5 y 6. Insertar staging y ejecutar el SP
             int insertedCustomers =
                 await _repository.InsertAndProcessAsync(
                     executionId.Value,
@@ -155,13 +149,12 @@ public sealed class Worker : BackgroundService
                     cancellationToken);
 
 
-            // 7. Finalizar como Succeeded
             _logger.LogInformation(
-    "Métricas enviadas. Total={Total}, Correctos={Succeeded}, Incorrectos={Failed}, Afectados={Affected}",
-    customers.Count,
-    validCount,
-    invalidCount,
-    insertedCustomers);
+                "Métricas enviadas. Total={Total}, Correctos={Succeeded}, Incorrectos={Failed}, Afectados={Affected}",
+                customers.Count,
+                validCount,
+                invalidCount,
+                insertedCustomers);
 
             await FinishExecutionAsync(
                 client,
@@ -205,7 +198,6 @@ public sealed class Worker : BackgroundService
         }
         catch (Exception exception)
         {
-            // 8. Finalizar como Failed
             if (executionId.HasValue)
             {
                 try
@@ -215,15 +207,15 @@ public sealed class Worker : BackgroundService
                             TimeSpan.FromSeconds(10));
 
                     await FinishExecutionAsync(
-      client,
-      executionId.Value,
-      "Failed",
-      LimitErrorMessage(exception.Message),
-      null,
-      null,
-      null,
-      null,
-      finishTimeout.Token);
+                        client,
+                        executionId.Value,
+                        "Failed",
+                        LimitErrorMessage(exception.Message),
+                        null,
+                        null,
+                        null,
+                        null,
+                        finishTimeout.Token);
                 }
                 catch (Exception finishException)
                 {
@@ -258,7 +250,7 @@ public sealed class Worker : BackgroundService
             WorkerId = workerId
         };
 
-        HttpResponseMessage response =
+        using HttpResponseMessage response =
             await client.PostAsJsonAsync(
                 "api/executions/start",
                 request,
@@ -345,20 +337,13 @@ public sealed class Worker : BackgroundService
             AffectedRows = affectedRows
         };
 
-        HttpResponseMessage response =
+        using HttpResponseMessage response =
             await client.PostAsJsonAsync(
                 $"api/executions/{executionId}/finish",
                 request,
                 cancellationToken);
 
         response.EnsureSuccessStatusCode();
-    }
-
-    private string GetRequiredSetting(string key)
-    {
-        return _configuration[key]
-            ?? throw new InvalidOperationException(
-                $"No se encontró la configuración '{key}'.");
     }
 
     private static string LimitErrorMessage(
@@ -387,7 +372,8 @@ public sealed class Worker : BackgroundService
             Path.Combine(
                 destinationFolder,
                 $"{fileName}_{executionId}_" +
-                $"{DateTime.Now:yyyyMMdd_HHmmss}" +
+                $"{DateTime.UtcNow:yyyyMMdd_HHmmss_fff}" +
+                $"_{Guid.NewGuid():N}" +
                 extension);
 
         File.Move(sourceFile, destinationFile);
@@ -418,7 +404,8 @@ public sealed class Worker : BackgroundService
             Path.Combine(
                 destinationFolder,
                 $"{fileName}_{identifier}_" +
-                $"{DateTime.Now:yyyyMMdd_HHmmss}" +
+                $"{DateTime.UtcNow:yyyyMMdd_HHmmss_fff}" +
+                $"_{Guid.NewGuid():N}" +
                 extension);
 
         File.Move(sourceFile, destinationFile);

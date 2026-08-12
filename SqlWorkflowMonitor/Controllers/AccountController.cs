@@ -1,10 +1,13 @@
-﻿using System.Security.Claims;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
+using SqlWorkflowMonitor.Security;
 using SqlWorkflowMonitor.ViewModels;
 
 namespace SqlWorkflowMonitor.Controllers;
@@ -15,15 +18,16 @@ public sealed class AccountController : Controller
     private const int PasswordIterations = 210_000;
     private const int PasswordHashSize = 32;
 
-    private readonly IConfiguration _configuration;
+    private readonly SecurityOptions _securityOptions;
 
     public AccountController(
-        IConfiguration configuration)
+        IOptions<SecurityOptions> securityOptions)
     {
-        _configuration = configuration;
+        _securityOptions = securityOptions.Value;
     }
 
     [AllowAnonymous]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     [HttpGet("login")]
     public IActionResult Login(
         string? returnUrl = null)
@@ -42,6 +46,8 @@ public sealed class AccountController : Controller
     }
 
     [AllowAnonymous]
+    [EnableRateLimiting("login")]
+    [ResponseCache(NoStore = true, Location = ResponseCacheLocation.None)]
     [ValidateAntiForgeryToken]
     [HttpPost("login")]
     public async Task<IActionResult> Login(
@@ -54,14 +60,14 @@ public sealed class AccountController : Controller
                 model);
         }
 
-        string? configuredUsername =
-            _configuration["Security:Admin:Username"];
+        string configuredUsername =
+            _securityOptions.Admin.Username;
 
-        string? configuredPasswordHash =
-            _configuration["Security:Admin:PasswordHash"];
+        string configuredPasswordHash =
+            _securityOptions.Admin.PasswordHash;
 
-        string? configuredPasswordSalt =
-            _configuration["Security:Admin:PasswordSalt"];
+        string configuredPasswordSalt =
+            _securityOptions.Admin.PasswordSalt;
 
         if (string.IsNullOrWhiteSpace(configuredUsername) ||
             string.IsNullOrWhiteSpace(configuredPasswordHash) ||

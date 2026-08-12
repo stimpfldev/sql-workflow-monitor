@@ -1,0 +1,1341 @@
+/* ===== BEGIN FILE: 001_CreateDatabase.sql ===== */
+USE master;
+GO
+
+IF DB_ID(N'SqlWorkflowMonitor_Dev') IS NULL
+BEGIN
+    CREATE DATABASE SqlWorkflowMonitor_Dev;
+END;
+GO
+/* ===== END FILE: 001_CreateDatabase.sql ===== */
+GO
+/* ===== BEGIN FILE: 002_CreateTables.sql ===== */
+USE SqlWorkflowMonitor_Dev;
+GO
+
+/* Tabla que define los procesos monitoreados */
+IF OBJECT_ID('dbo.Processes', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Processes
+    (
+        ProcessId INT IDENTITY(1,1) NOT NULL,
+        Name NVARCHAR(100) NOT NULL,
+        Description NVARCHAR(300) NULL,
+        ProcessType VARCHAR(30) NOT NULL,
+
+        IsActive BIT NOT NULL
+            CONSTRAINT DF_Processes_IsActive DEFAULT 1,
+
+        CreatedAt DATETIME2(3) NOT NULL
+            CONSTRAINT DF_Processes_CreatedAt
+            DEFAULT SYSUTCDATETIME(),
+
+        CONSTRAINT PK_Processes
+            PRIMARY KEY (ProcessId)
+    );
+END;
+GO
+
+/* Tabla que guarda cada ejecuciÃ³n de un proceso */
+IF OBJECT_ID('dbo.ProcessExecutions', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.ProcessExecutions
+    (
+        ExecutionId BIGINT IDENTITY(1,1) NOT NULL,
+        ProcessId INT NOT NULL,
+        Status VARCHAR(20) NOT NULL,
+        StartedAt DATETIME2(3) NOT NULL,
+        FinishedAt DATETIME2(3) NULL,
+        ErrorMessage NVARCHAR(2000) NULL,
+                /* MÃ©tricas de la ejecuciÃ³n */
+        TotalItems INT NULL,
+        SucceededItems INT NULL,
+        FailedItems INT NULL,
+        AffectedRows INT NULL,
+        /* DuraciÃ³n calculada automÃ¡ticamente */
+        DurationMs AS
+        (
+            CASE
+                WHEN FinishedAt IS NULL THEN NULL
+                ELSE DATEDIFF_BIG
+                (
+                    MILLISECOND,
+                    StartedAt,
+                    FinishedAt
+                )
+            END
+        ),
+
+        CONSTRAINT PK_ProcessExecutions
+            PRIMARY KEY (ExecutionId),
+
+        CONSTRAINT FK_ProcessExecutions_Processes
+            FOREIGN KEY (ProcessId)
+            REFERENCES dbo.Processes(ProcessId),
+
+        CONSTRAINT CK_ProcessExecutions_Status
+            CHECK
+            (
+                Status IN
+                (
+                    'Running',
+                    'Succeeded',
+                    'Failed',
+                    'Cancelled'
+                )
+            )
+    );
+END;
+GO
+
+/* Ãndice para consultar ejecuciones por proceso y fecha */
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'IX_ProcessExecutions_ProcessId_StartedAt'
+      AND object_id = OBJECT_ID('dbo.ProcessExecutions')
+)
+BEGIN
+    CREATE INDEX IX_ProcessExecutions_ProcessId_StartedAt
+        ON dbo.ProcessExecutions
+        (
+            ProcessId,
+            StartedAt DESC
+        );
+END;
+GO
+
+/* Ãndice para filtrar rÃ¡pidamente por estado */
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.indexes
+    WHERE name = 'IX_ProcessExecutions_Status'
+      AND object_id = OBJECT_ID('dbo.ProcessExecutions')
+)
+BEGIN
+    CREATE INDEX IX_ProcessExecutions_Status
+        ON dbo.ProcessExecutions(Status);
+END;
+GO
+/* Tabla final de clientes procesados */
+IF OBJECT_ID('dbo.Customers', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Customers
+    (
+        CustomerId BIGINT IDENTITY(1,1) NOT NULL,
+
+        Name NVARCHAR(150) NOT NULL,
+
+        Email NVARCHAR(200) NOT NULL,
+
+        CreatedAt DATETIME2 NOT NULL
+            CONSTRAINT DF_Customers_CreatedAt
+            DEFAULT SYSDATETIME(),
+
+        CONSTRAINT PK_Customers
+            PRIMARY KEY (CustomerId)
+    );
+END;
+GO
+
+
+/* Tabla temporal utilizada durante la importaciÃ³n */
+IF OBJECT_ID('dbo.StagingCustomers', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.StagingCustomers
+    (
+        StagingCustomerId BIGINT IDENTITY(1,1) NOT NULL,
+
+        ExecutionId BIGINT NOT NULL,
+
+        Name NVARCHAR(150) NULL,
+
+        Email NVARCHAR(200) NULL,
+
+        IsValid BIT NOT NULL,
+
+        ValidationError NVARCHAR(500) NULL,
+
+        CreatedAt DATETIME2 NOT NULL
+            CONSTRAINT DF_StagingCustomers_CreatedAt
+            DEFAULT SYSDATETIME(),
+
+        CONSTRAINT PK_StagingCustomers
+            PRIMARY KEY (StagingCustomerId),
+
+        CONSTRAINT FK_StagingCustomers_ProcessExecutions
+            FOREIGN KEY (ExecutionId)
+            REFERENCES dbo.ProcessExecutions(ExecutionId)
+    );
+END;
+GO
+/* ===== END FILE: 002_CreateTables.sql ===== */
+GO
+/* ===== BEGIN FILE: 003_CreateProcedures.sql ===== */
+USE SqlWorkflowMonitor_Dev;
+GO
+
+/* Inicia una nueva ejecuciÃ³n */
+CREATE OR ALTER PROCEDURE dbo.sp_ProcessExecution_Start
+    @ProcessId INT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    /* Verifica que el proceso exista y estÃ© activo */
+    IF NOT EXISTS
+    (
+        SELECT 1
+        FROM dbo.Processes
+        WHERE ProcessId = @ProcessId
+          AND IsActive = 1
+    )
+    BEGIN
+       ;THROW 50001,
+              'El proceso no existe o estÃ¡ inactivo.',
+              1;
+    END;
+
+    INSERT INTO dbo.ProcessExecutions
+    (
+        ProcessId,
+        Status,
+        StartedAt
+    )
+    VALUES
+    (
+        @ProcessId,
+        'Running',
+        SYSUTCDATETIME()
+    );
+
+    DECLARE @ExecutionId BIGINT;
+
+    SET @ExecutionId =
+        CAST(SCOPE_IDENTITY() AS BIGINT);
+
+    /* Devuelve la ejecuciÃ³n creada */
+    SELECT
+        ExecutionId,
+        ProcessId,
+        Status,
+        StartedAt,
+        FinishedAt,
+        DurationMs,
+        ErrorMessage
+    FROM dbo.ProcessExecutions
+    WHERE ExecutionId = @ExecutionId;
+END;
+GO
+
+
+/* Finaliza una ejecuciÃ³n */
+CREATE OR ALTER PROCEDURE dbo.sp_ProcessExecution_Finish
+    @ExecutionId BIGINT,
+    @Status VARCHAR(20),
+    @ErrorMessage NVARCHAR(2000) = NULL,
+    @TotalItems INT = NULL,
+    @SucceededItems INT = NULL,
+    @FailedItems INT = NULL,
+    @AffectedRows INT = NULL
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    /* Solo acepta estados finales */
+    IF @Status NOT IN
+    (
+        'Succeeded',
+        'Failed',
+        'Cancelled'
+    )
+    BEGIN
+       ;THROW 50002,
+              'El estado final no es vÃ¡lido.',
+              1;
+    END;
+
+    /* Si fallÃ³, debe indicar el error */
+    IF @Status = 'Failed'
+       AND NULLIF
+       (
+           LTRIM(RTRIM(@ErrorMessage)),
+           ''
+       ) IS NULL
+    BEGIN
+       ; THROW 50003,
+              'Una ejecuciÃ³n fallida debe informar el error.',
+              1;
+    END;
+
+    UPDATE dbo.ProcessExecutions
+    SET
+        Status = @Status,
+        FinishedAt = SYSUTCDATETIME(),
+       ErrorMessage =
+    CASE
+        WHEN @Status = 'Failed'
+            THEN @ErrorMessage
+        ELSE NULL
+    END,
+        TotalItems = @TotalItems,
+        SucceededItems = @SucceededItems,
+        FailedItems = @FailedItems,
+        AffectedRows = @AffectedRows
+    WHERE ExecutionId = @ExecutionId
+      AND Status = 'Running'
+      AND FinishedAt IS NULL;
+
+    /* Si no actualizÃ³ ninguna fila */
+    IF @@ROWCOUNT = 0
+    BEGIN
+       ;THROW 50004,
+              'La ejecuciÃ³n no existe o ya fue finalizada.',
+              1;
+    END;
+
+    /* Devuelve la ejecuciÃ³n finalizada */
+    SELECT
+        ExecutionId,
+        ProcessId,
+        Status,
+        StartedAt,
+        FinishedAt,
+        DurationMs,
+        ErrorMessage,
+        TotalItems,
+        SucceededItems,
+        FailedItems,
+        AffectedRows
+    FROM dbo.ProcessExecutions
+    WHERE ExecutionId = @ExecutionId;
+END;
+GO
+/* Lista ejecuciones que permanecen en Running demasiado tiempo */
+/* Lista una cantidad limitada de ejecuciones */
+CREATE OR ALTER PROCEDURE dbo.sp_ProcessExecution_List
+    @MaxRows INT = 100
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @MaxRows < 1
+        SET @MaxRows = 1;
+
+    IF @MaxRows > 500
+        SET @MaxRows = 500;
+
+    SELECT TOP (@MaxRows)
+        e.ExecutionId,
+        e.ProcessId,
+        p.Name AS ProcessName,
+        e.Status,
+        e.StartedAt,
+        e.FinishedAt,
+        e.DurationMs
+    FROM dbo.ProcessExecutions e
+    INNER JOIN dbo.Processes p
+        ON p.ProcessId = e.ProcessId
+    ORDER BY e.ExecutionId DESC;
+END;
+GO
+
+
+USE SqlWorkflowMonitor_Dev;
+GO
+
+CREATE OR ALTER PROCEDURE  dbo.sp_ProcessExecution_ListPaged
+    @Status VARCHAR(20) = NULL,
+    @ProcessId INT = NULL,
+    @DateFrom DATE = NULL,
+    @DateTo DATE = NULL,
+    @PageNumber INT = 1,
+    @PageSize INT = 10,
+    @SortBy VARCHAR(20) = 'ExecutionId',
+    @SortDirection VARCHAR(4) = 'DESC',
+    @StaleThresholdMinutes INT = 10
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    IF @PageNumber < 1
+        SET @PageNumber = 1;
+
+    IF @PageSize NOT IN (10, 25, 50)
+        SET @PageSize = 10;
+
+    IF @SortBy IS NULL
+       OR @SortBy NOT IN
+       (
+           'ExecutionId',
+           'ProcessName',
+           'Status',
+           'StartedAt',
+           'FinishedAt',
+           'DurationMs'
+       )
+        SET @SortBy = 'ExecutionId';
+
+    IF @SortDirection IS NULL
+       OR @SortDirection NOT IN ('ASC', 'DESC')
+        SET @SortDirection = 'DESC';
+
+    IF @StaleThresholdMinutes < 1
+        SET @StaleThresholdMinutes = 10;
+
+    DECLARE @TotalCount INT;
+    DECLARE @RunningCount INT;
+    DECLARE @StaleRunningCount INT;
+    DECLARE @SucceededCount INT;
+    DECLARE @FailedCount INT;
+    DECLARE @AverageDurationMs BIGINT;
+    DECLARE @TotalPages INT;
+    DECLARE @Offset INT;
+
+    SELECT
+        @TotalCount = COUNT(*),
+        @RunningCount = COALESCE(
+            SUM(CASE WHEN e.Status = 'Running' THEN 1 ELSE 0 END),
+            0),
+        @StaleRunningCount = COALESCE(
+            SUM(
+                CASE
+                    WHEN e.Status = 'Running'
+                         AND e.FinishedAt IS NULL
+                         AND e.StartedAt < DATEADD(
+                             MINUTE,
+                             -@StaleThresholdMinutes,
+                             SYSUTCDATETIME())
+                    THEN 1
+                    ELSE 0
+                END),
+            0),
+        @SucceededCount = COALESCE(
+            SUM(CASE WHEN e.Status = 'Succeeded' THEN 1 ELSE 0 END),
+            0),
+        @FailedCount = COALESCE(
+            SUM(CASE WHEN e.Status = 'Failed' THEN 1 ELSE 0 END),
+            0),
+        @AverageDurationMs =
+            CONVERT(
+                BIGINT,
+                ROUND(
+                    AVG(
+                        CASE
+                            WHEN e.Status = 'Succeeded'
+                                 AND e.DurationMs IS NOT NULL
+                            THEN CONVERT(DECIMAL(20, 2), e.DurationMs)
+                        END),
+                    0))
+    FROM dbo.ProcessExecutions e
+    WHERE
+        (@Status IS NULL OR @Status = '' OR e.Status = @Status)
+        AND (@ProcessId IS NULL OR e.ProcessId = @ProcessId)
+        AND (@DateFrom IS NULL OR e.StartedAt >= @DateFrom)
+        AND
+        (
+            @DateTo IS NULL
+            OR e.StartedAt < DATEADD(
+                DAY,
+                1,
+                CONVERT(DATETIME2, @DateTo))
+        );
+
+    SET @TotalPages =
+        CASE
+            WHEN @TotalCount = 0 THEN 0
+            ELSE (@TotalCount + @PageSize - 1) / @PageSize
+        END;
+
+    IF @TotalPages > 0
+       AND @PageNumber > @TotalPages
+    BEGIN
+        SET @PageNumber = @TotalPages;
+    END;
+
+    SET @Offset = (@PageNumber - 1) * @PageSize;
+
+    /* Resultado 1: ejecuciones de la pÃ¡gina */
+    SELECT
+        e.ExecutionId,
+        e.ProcessId,
+        p.Name AS ProcessName,
+        e.Status,
+        e.StartedAt,
+        e.FinishedAt,
+        e.DurationMs
+    FROM dbo.ProcessExecutions e
+    INNER JOIN dbo.Processes p
+        ON p.ProcessId = e.ProcessId
+    WHERE
+        (@Status IS NULL OR @Status = '' OR e.Status = @Status)
+        AND (@ProcessId IS NULL OR e.ProcessId = @ProcessId)
+        AND (@DateFrom IS NULL OR e.StartedAt >= @DateFrom)
+        AND
+        (
+            @DateTo IS NULL
+            OR e.StartedAt < DATEADD(
+                DAY,
+                1,
+                CONVERT(DATETIME2, @DateTo))
+        )
+    ORDER BY
+        CASE
+            WHEN @SortBy = 'ExecutionId'
+                 AND @SortDirection = 'ASC'
+            THEN e.ExecutionId
+        END ASC,
+        CASE
+            WHEN @SortBy = 'ExecutionId'
+                 AND @SortDirection = 'DESC'
+            THEN e.ExecutionId
+        END DESC,
+        CASE
+            WHEN @SortBy = 'ProcessName'
+                 AND @SortDirection = 'ASC'
+            THEN p.Name
+        END ASC,
+        CASE
+            WHEN @SortBy = 'ProcessName'
+                 AND @SortDirection = 'DESC'
+            THEN p.Name
+        END DESC,
+        CASE
+            WHEN @SortBy = 'Status'
+                 AND @SortDirection = 'ASC'
+            THEN e.Status
+        END ASC,
+        CASE
+            WHEN @SortBy = 'Status'
+                 AND @SortDirection = 'DESC'
+            THEN e.Status
+        END DESC,
+        CASE
+            WHEN @SortBy = 'StartedAt'
+                 AND @SortDirection = 'ASC'
+            THEN e.StartedAt
+        END ASC,
+        CASE
+            WHEN @SortBy = 'StartedAt'
+                 AND @SortDirection = 'DESC'
+            THEN e.StartedAt
+        END DESC,
+
+        /* Finalizaciones NULL siempre al final */
+        CASE
+            WHEN @SortBy = 'FinishedAt'
+                 AND e.FinishedAt IS NULL
+            THEN 1
+            ELSE 0
+        END ASC,
+        CASE
+            WHEN @SortBy = 'FinishedAt'
+                 AND @SortDirection = 'ASC'
+            THEN e.FinishedAt
+        END ASC,
+        CASE
+            WHEN @SortBy = 'FinishedAt'
+                 AND @SortDirection = 'DESC'
+            THEN e.FinishedAt
+        END DESC,
+
+        /* Duraciones NULL siempre al final */
+        CASE
+            WHEN @SortBy = 'DurationMs'
+                 AND e.DurationMs IS NULL
+            THEN 1
+            ELSE 0
+        END ASC,
+        CASE
+            WHEN @SortBy = 'DurationMs'
+                 AND @SortDirection = 'ASC'
+            THEN e.DurationMs
+        END ASC,
+        CASE
+            WHEN @SortBy = 'DurationMs'
+                 AND @SortDirection = 'DESC'
+            THEN e.DurationMs
+        END DESC,
+
+        e.ExecutionId DESC
+    OFFSET @Offset ROWS
+    FETCH NEXT @PageSize ROWS ONLY;
+
+    /* Resultado 2: resumen de todos los registros filtrados */
+    SELECT
+        @TotalCount AS TotalCount,
+        @PageNumber AS PageNumber,
+        @PageSize AS PageSize,
+        @TotalPages AS TotalPages,
+        @RunningCount AS RunningCount,
+        @StaleRunningCount AS StaleRunningCount,
+        @SucceededCount AS SucceededCount,
+        @FailedCount AS FailedCount,
+        @AverageDurationMs AS AverageDurationMs;
+
+    /* Resultado 3: procesos del combo */
+    SELECT DISTINCT
+        p.ProcessId,
+        p.Name AS ProcessName
+    FROM dbo.Processes p
+    INNER JOIN dbo.ProcessExecutions e
+        ON e.ProcessId = p.ProcessId
+    ORDER BY p.Name;
+END;
+GO
+
+/* Procesa clientes vÃ¡lidos de staging */
+CREATE OR ALTER PROCEDURE dbo.sp_StagingCustomers_Process
+    @ExecutionId BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        INSERT INTO dbo.Customers
+        (
+            Name,
+            Email
+        )
+        SELECT
+            Name,
+            Email
+        FROM dbo.StagingCustomers
+        WHERE ExecutionId = @ExecutionId
+          AND IsValid = 1;
+
+        DECLARE @InsertedCustomers INT =
+            @@ROWCOUNT;
+
+        COMMIT TRANSACTION;
+
+        SELECT
+            @InsertedCustomers AS InsertedCustomers;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END;
+
+        THROW;
+    END CATCH;
+END;
+GO
+/* Lista todas las ejecuciones */
+CREATE OR ALTER PROCEDURE dbo.sp_ProcessExecution_List
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        e.ExecutionId,
+        e.ProcessId,
+        p.Name AS ProcessName,
+        e.Status,
+        e.StartedAt,
+        e.FinishedAt,
+        e.DurationMs
+    FROM dbo.ProcessExecutions e
+    INNER JOIN dbo.Processes p
+        ON p.ProcessId = e.ProcessId
+    ORDER BY e.ExecutionId DESC;
+END;
+GO
+/* Obtiene el detalle de una ejecuciÃ³n */
+CREATE OR ALTER PROCEDURE dbo.sp_ProcessExecution_GetById
+    @ExecutionId BIGINT
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    SELECT
+        e.ExecutionId,
+        e.ProcessId,
+        p.Name AS ProcessName,
+        e.Status,
+        e.StartedAt,
+        e.FinishedAt,
+        e.DurationMs,
+        e.ErrorMessage,
+        e.TotalItems,
+        e.SucceededItems,
+        e.FailedItems,
+        e.AffectedRows
+    FROM dbo.ProcessExecutions e
+    INNER JOIN dbo.Processes p
+        ON p.ProcessId = e.ProcessId
+    WHERE e.ExecutionId = @ExecutionId;
+END;
+GO
+
+/* ===== END FILE: 003_CreateProcedures.sql ===== */
+GO
+/* ===== BEGIN FILE: 004_SeedData.sql ===== */
+USE SqlWorkflowMonitor_Dev;
+GO
+
+/* Inserta procesos iniciales solo si todavÃ­a no existen */
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM dbo.Processes
+    WHERE Name = 'ImportaciÃ³n de clientes'
+)
+BEGIN
+    INSERT INTO dbo.Processes
+    (
+        Name,
+        Description,
+        ProcessType
+    )
+    VALUES
+    (
+        'ImportaciÃ³n de clientes',
+        'Importa clientes desde un archivo CSV.',
+        'Batch'
+    );
+END;
+GO
+
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM dbo.Processes
+    WHERE Name = 'GeneraciÃ³n de reporte diario'
+)
+BEGIN
+    INSERT INTO dbo.Processes
+    (
+        Name,
+        Description,
+        ProcessType
+    )
+    VALUES
+    (
+        'GeneraciÃ³n de reporte diario',
+        'Genera el resumen diario de operaciones.',
+        'StoredProcedure'
+    );
+END;
+GO
+
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM dbo.Processes
+    WHERE Name = 'SincronizaciÃ³n con API externa'
+)
+BEGIN
+    INSERT INTO dbo.Processes
+    (
+        Name,
+        Description,
+        ProcessType
+    )
+    VALUES
+    (
+        'SincronizaciÃ³n con API externa',
+        'Sincroniza informaciÃ³n con un proveedor externo.',
+        'ApiIntegration'
+    );
+END;
+GO
+
+/* Muestra los datos insertados */
+SELECT
+    ProcessId,
+    Name,
+    Description,
+    ProcessType,
+    IsActive,
+    CreatedAt
+FROM dbo.Processes
+ORDER BY ProcessId;
+GO
+/* ===== END FILE: 004_SeedData.sql ===== */
+GO
+/* ===== BEGIN FILE: 005_AddExecutionConsistencyChecks.sql ===== */
+/* =========================================================
+   Restricciones de consistencia para ProcessExecutions
+   Ejecutar sobre la base SqlWorkflowMonitor_Dev
+   ========================================================= */
+
+
+/* 1. Running no puede tener FinishedAt.
+      Los estados finales deben tener FinishedAt. */
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.check_constraints
+    WHERE name = 'CK_ProcessExecutions_Status_FinishedAt'
+      AND parent_object_id = OBJECT_ID('dbo.ProcessExecutions')
+)
+BEGIN
+    ALTER TABLE dbo.ProcessExecutions
+    WITH CHECK
+    ADD CONSTRAINT CK_ProcessExecutions_Status_FinishedAt
+    CHECK
+    (
+        (
+            Status = 'Running'
+            AND FinishedAt IS NULL
+        )
+        OR
+        (
+            Status IN ('Succeeded', 'Failed', 'Cancelled')
+            AND FinishedAt IS NOT NULL
+        )
+    );
+END;
+GO
+
+
+/* 2. FinishedAt no puede ser anterior a StartedAt. */
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.check_constraints
+    WHERE name = 'CK_ProcessExecutions_DateRange'
+      AND parent_object_id = OBJECT_ID('dbo.ProcessExecutions')
+)
+BEGIN
+    ALTER TABLE dbo.ProcessExecutions
+    WITH CHECK
+    ADD CONSTRAINT CK_ProcessExecutions_DateRange
+    CHECK
+    (
+        FinishedAt IS NULL
+        OR FinishedAt >= StartedAt
+    );
+END;
+GO
+
+
+/* 3. Failed debe tener ErrorMessage.
+      Los demÃ¡s estados no deben tenerlo. */
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.check_constraints
+    WHERE name = 'CK_ProcessExecutions_ErrorMessage'
+      AND parent_object_id = OBJECT_ID('dbo.ProcessExecutions')
+)
+BEGIN
+    ALTER TABLE dbo.ProcessExecutions
+    WITH CHECK
+    ADD CONSTRAINT CK_ProcessExecutions_ErrorMessage
+    CHECK
+    (
+        (
+            Status = 'Failed'
+            AND NULLIF(LTRIM(RTRIM(ErrorMessage)), '') IS NOT NULL
+        )
+        OR
+        (
+            Status <> 'Failed'
+            AND ErrorMessage IS NULL
+        )
+    );
+END;
+GO
+/* ===== END FILE: 005_AddExecutionConsistencyChecks.sql ===== */
+GO
+/* ===== BEGIN FILE: 006_AddExecutionMetricsChecks.sql ===== */
+USE SqlWorkflowMonitor_Dev;
+GO
+
+/* Las mÃ©tricas informadas no pueden ser negativas */
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.check_constraints
+    WHERE name =
+        'CK_ProcessExecutions_MetricsNonNegative'
+      AND parent_object_id =
+          OBJECT_ID('dbo.ProcessExecutions')
+)
+BEGIN
+    ALTER TABLE dbo.ProcessExecutions
+    WITH CHECK
+    ADD CONSTRAINT CK_ProcessExecutions_MetricsNonNegative
+    CHECK
+    (
+        (TotalItems IS NULL OR TotalItems >= 0)
+        AND
+        (SucceededItems IS NULL OR SucceededItems >= 0)
+        AND
+        (FailedItems IS NULL OR FailedItems >= 0)
+        AND
+        (AffectedRows IS NULL OR AffectedRows >= 0)
+    );
+END;
+GO
+
+
+/* Los elementos exitosos mÃ¡s los fallidos
+   no pueden superar el total */
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM sys.check_constraints
+    WHERE name =
+        'CK_ProcessExecutions_MetricsWithinTotal'
+      AND parent_object_id =
+          OBJECT_ID('dbo.ProcessExecutions')
+)
+BEGIN
+    ALTER TABLE dbo.ProcessExecutions
+    WITH CHECK
+    ADD CONSTRAINT CK_ProcessExecutions_MetricsWithinTotal
+    CHECK
+    (
+        TotalItems IS NULL
+        OR
+        (
+            COALESCE(SucceededItems, 0)
+            + COALESCE(FailedItems, 0)
+            <= TotalItems
+        )
+    );
+END;
+GO
+/* ===== END FILE: 006_AddExecutionMetricsChecks.sql ===== */
+GO
+/* ===== BEGIN FILE: 007_AddCsvExport.sql ===== */
+USE SqlWorkflowMonitor_Dev;
+GO
+
+/* Exporta las ejecuciones usando los mismos filtros y orden del dashboard. */
+CREATE OR ALTER PROCEDURE dbo.sp_ProcessExecution_Export
+    @Status VARCHAR(20) = NULL,
+    @ProcessId INT = NULL,
+    @DateFrom DATE = NULL,
+    @DateTo DATE = NULL,
+    @SortBy VARCHAR(20) = 'ExecutionId',
+ @SortDirection VARCHAR(4) = 'DESC',
+@MaxRows INT = 5000
+AS
+BEGIN
+    SET NOCOUNT ON;
+    IF @MaxRows < 1
+    SET @MaxRows = 1;
+
+IF @MaxRows > 5000
+    SET @MaxRows = 5000;
+    IF @SortBy IS NULL
+       OR @SortBy NOT IN
+       (
+           'ExecutionId',
+           'ProcessName',
+           'Status',
+           'StartedAt',
+           'FinishedAt',
+           'DurationMs'
+       )
+    BEGIN
+        SET @SortBy = 'ExecutionId';
+    END;
+
+    IF @SortDirection IS NULL
+       OR @SortDirection NOT IN ('ASC', 'DESC')
+    BEGIN
+        SET @SortDirection = 'DESC';
+    END;
+
+    SELECT TOP (@MaxRows)
+        e.ExecutionId,
+        e.ProcessId,
+        p.Name AS ProcessName,
+        e.Status,
+        e.StartedAt,
+        e.FinishedAt,
+        e.DurationMs
+    FROM dbo.ProcessExecutions e
+    INNER JOIN dbo.Processes p
+        ON p.ProcessId = e.ProcessId
+    WHERE
+        (@Status IS NULL OR @Status = '' OR e.Status = @Status)
+        AND (@ProcessId IS NULL OR e.ProcessId = @ProcessId)
+        AND (@DateFrom IS NULL OR e.StartedAt >= @DateFrom)
+        AND
+        (
+            @DateTo IS NULL
+            OR e.StartedAt < DATEADD(
+                DAY,
+                1,
+                CONVERT(DATETIME2, @DateTo))
+        )
+    ORDER BY
+        CASE
+            WHEN @SortBy = 'ExecutionId'
+                 AND @SortDirection = 'ASC'
+            THEN e.ExecutionId
+        END ASC,
+        CASE
+            WHEN @SortBy = 'ExecutionId'
+                 AND @SortDirection = 'DESC'
+            THEN e.ExecutionId
+        END DESC,
+        CASE
+            WHEN @SortBy = 'ProcessName'
+                 AND @SortDirection = 'ASC'
+            THEN p.Name
+        END ASC,
+        CASE
+            WHEN @SortBy = 'ProcessName'
+                 AND @SortDirection = 'DESC'
+            THEN p.Name
+        END DESC,
+        CASE
+            WHEN @SortBy = 'Status'
+                 AND @SortDirection = 'ASC'
+            THEN e.Status
+        END ASC,
+        CASE
+            WHEN @SortBy = 'Status'
+                 AND @SortDirection = 'DESC'
+            THEN e.Status
+        END DESC,
+        CASE
+            WHEN @SortBy = 'StartedAt'
+                 AND @SortDirection = 'ASC'
+            THEN e.StartedAt
+        END ASC,
+        CASE
+            WHEN @SortBy = 'StartedAt'
+                 AND @SortDirection = 'DESC'
+            THEN e.StartedAt
+        END DESC,
+        CASE
+            WHEN @SortBy = 'FinishedAt'
+                 AND e.FinishedAt IS NULL
+            THEN 1
+            ELSE 0
+        END ASC,
+        CASE
+            WHEN @SortBy = 'FinishedAt'
+                 AND @SortDirection = 'ASC'
+            THEN e.FinishedAt
+        END ASC,
+        CASE
+            WHEN @SortBy = 'FinishedAt'
+                 AND @SortDirection = 'DESC'
+            THEN e.FinishedAt
+        END DESC,
+        CASE
+            WHEN @SortBy = 'DurationMs'
+                 AND e.DurationMs IS NULL
+            THEN 1
+            ELSE 0
+        END ASC,
+        CASE
+            WHEN @SortBy = 'DurationMs'
+                 AND @SortDirection = 'ASC'
+            THEN e.DurationMs
+        END ASC,
+        CASE
+            WHEN @SortBy = 'DurationMs'
+                 AND @SortDirection = 'DESC'
+            THEN e.DurationMs
+        END DESC,
+        e.ExecutionId DESC;
+END;
+GO
+
+/* ===== END FILE: 007_AddCsvExport.sql ===== */
+GO
+/* ===== BEGIN FILE: 008_AddDemoRestrictions.sql ===== */
+USE SqlWorkflowMonitor_Dev;
+GO
+
+/*
+    Estado persistente de la instalaciÃ³n Demo.
+    La fecha se crea una sola vez y no cambia al reiniciar la aplicaciÃ³n.
+*/
+IF OBJECT_ID('dbo.ProductInstallation', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.ProductInstallation
+    (
+        InstallationId TINYINT NOT NULL,
+        Edition VARCHAR(20) NOT NULL,
+        InstalledAtUtc DATETIME2(3) NOT NULL,
+        DemoDays INT NOT NULL,
+        MaxProcesses INT NOT NULL,
+        MaxWorkers INT NOT NULL,
+        CsvExportEnabled BIT NOT NULL,
+
+        CONSTRAINT PK_ProductInstallation
+            PRIMARY KEY (InstallationId),
+
+        CONSTRAINT CK_ProductInstallation_SingleRow
+            CHECK (InstallationId = 1),
+
+        CONSTRAINT CK_ProductInstallation_DemoValues
+            CHECK
+            (
+                Edition = 'Demo'
+                AND DemoDays = 30
+                AND MaxProcesses = 3
+                AND MaxWorkers = 1
+                AND CsvExportEnabled = 1
+            )
+    );
+END;
+GO
+
+IF NOT EXISTS
+(
+    SELECT 1
+    FROM dbo.ProductInstallation
+    WHERE InstallationId = 1
+)
+BEGIN
+    INSERT INTO dbo.ProductInstallation
+    (
+        InstallationId,
+        Edition,
+        InstalledAtUtc,
+        DemoDays,
+        MaxProcesses,
+        MaxWorkers,
+        CsvExportEnabled
+    )
+    VALUES
+    (
+        1,
+        'Demo',
+        SYSUTCDATETIME(),
+        30,
+        3,
+        1,
+        1
+    );
+END;
+GO
+
+/* Procesos que ya consumieron un lugar de la Demo. */
+IF OBJECT_ID('dbo.DemoProcessRegistrations', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.DemoProcessRegistrations
+    (
+        ProcessId INT NOT NULL,
+        RegisteredAtUtc DATETIME2(3) NOT NULL
+            CONSTRAINT DF_DemoProcessRegistrations_RegisteredAtUtc
+            DEFAULT SYSUTCDATETIME(),
+
+        CONSTRAINT PK_DemoProcessRegistrations
+            PRIMARY KEY (ProcessId),
+
+        CONSTRAINT FK_DemoProcessRegistrations_Processes
+            FOREIGN KEY (ProcessId)
+            REFERENCES dbo.Processes(ProcessId)
+    );
+END;
+GO
+
+/* Workers/integraciones que ya consumieron un lugar de la Demo. */
+IF OBJECT_ID('dbo.DemoWorkerRegistrations', 'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.DemoWorkerRegistrations
+    (
+        WorkerId NVARCHAR(100) NOT NULL,
+        RegisteredAtUtc DATETIME2(3) NOT NULL
+            CONSTRAINT DF_DemoWorkerRegistrations_RegisteredAtUtc
+            DEFAULT SYSUTCDATETIME(),
+
+        CONSTRAINT PK_DemoWorkerRegistrations
+            PRIMARY KEY (WorkerId)
+    );
+END;
+GO
+
+/* Estado que se muestra en el dashboard. */
+CREATE OR ALTER PROCEDURE dbo.sp_ProductAccess_GetDemoStatus
+AS
+BEGIN
+    SET NOCOUNT ON;
+
+    DECLARE @CurrentUtc DATETIME2(3) =
+        SYSUTCDATETIME();
+
+    SELECT
+        installation.Edition,
+        installation.InstalledAtUtc,
+        DATEADD(
+            DAY,
+            installation.DemoDays,
+            installation.InstalledAtUtc) AS ExpiresAtUtc,
+        @CurrentUtc AS CurrentUtc,
+        installation.MaxProcesses,
+        CONVERT(
+            INT,
+            (
+                SELECT COUNT(*)
+                FROM dbo.DemoProcessRegistrations
+            )) AS RegisteredProcesses,
+        installation.MaxWorkers,
+        CONVERT(
+            INT,
+            (
+                SELECT COUNT(*)
+                FROM dbo.DemoWorkerRegistrations
+            )) AS RegisteredWorkers,
+        installation.CsvExportEnabled
+    FROM dbo.ProductInstallation installation
+    WHERE installation.InstallationId = 1;
+END;
+GO
+
+/*
+    Valida la Demo antes de iniciar una ejecuciÃ³n.
+    La transacciÃ³n evita que dos Workers o procesos nuevos superen
+    el lÃ­mite al intentar registrarse al mismo tiempo.
+*/
+CREATE OR ALTER PROCEDURE dbo.sp_ProductAccess_ValidateDemoStart
+    @ProcessId INT,
+    @WorkerId NVARCHAR(100)
+AS
+BEGIN
+    SET NOCOUNT ON;
+    SET XACT_ABORT ON;
+
+    SET @WorkerId = NULLIF(
+        LTRIM(RTRIM(@WorkerId)),
+        '');
+
+    IF @WorkerId IS NULL
+    BEGIN
+        ;THROW 50013,
+            'El Worker debe enviar un identificador.',
+            1;
+    END;
+
+    BEGIN TRY
+        BEGIN TRANSACTION;
+
+        DECLARE @InstalledAtUtc DATETIME2(3);
+        DECLARE @DemoDays INT;
+        DECLARE @MaxProcesses INT;
+        DECLARE @MaxWorkers INT;
+
+        SELECT
+            @InstalledAtUtc = InstalledAtUtc,
+            @DemoDays = DemoDays,
+            @MaxProcesses = MaxProcesses,
+            @MaxWorkers = MaxWorkers
+        FROM dbo.ProductInstallation WITH (UPDLOCK, HOLDLOCK)
+        WHERE InstallationId = 1;
+
+        IF @InstalledAtUtc IS NULL
+        BEGIN
+            ;THROW 50014,
+                'No se encontrÃ³ el estado de instalaciÃ³n de la Demo.',
+                1;
+        END;
+
+        IF SYSUTCDATETIME() >= DATEADD(
+                DAY,
+                @DemoDays,
+                @InstalledAtUtc)
+        BEGIN
+            ;THROW 50010,
+                'La Demo de 30 dÃ­as venciÃ³. El sistema permanece disponible en modo solo lectura.',
+                1;
+        END;
+
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.Processes
+            WHERE ProcessId = @ProcessId
+              AND IsActive = 1
+        )
+        BEGIN
+            ;THROW 50001,
+                'El proceso no existe o estÃ¡ inactivo.',
+                1;
+        END;
+
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.DemoProcessRegistrations WITH (UPDLOCK, HOLDLOCK)
+            WHERE ProcessId = @ProcessId
+        )
+        BEGIN
+            DECLARE @RegisteredProcesses INT;
+
+            SELECT @RegisteredProcesses = COUNT(*)
+            FROM dbo.DemoProcessRegistrations WITH (UPDLOCK, HOLDLOCK);
+
+            IF @RegisteredProcesses >= @MaxProcesses
+            BEGIN
+                ;THROW 50011,
+                    'La ediciÃ³n Demo permite monitorear como mÃ¡ximo 3 procesos.',
+                    1;
+            END;
+
+            INSERT INTO dbo.DemoProcessRegistrations
+            (
+                ProcessId
+            )
+            VALUES
+            (
+                @ProcessId
+            );
+        END;
+
+        IF NOT EXISTS
+        (
+            SELECT 1
+            FROM dbo.DemoWorkerRegistrations WITH (UPDLOCK, HOLDLOCK)
+            WHERE WorkerId = @WorkerId
+        )
+        BEGIN
+            DECLARE @RegisteredWorkers INT;
+
+            SELECT @RegisteredWorkers = COUNT(*)
+            FROM dbo.DemoWorkerRegistrations WITH (UPDLOCK, HOLDLOCK);
+
+            IF @RegisteredWorkers >= @MaxWorkers
+            BEGIN
+                ;THROW 50012,
+                    'La ediciÃ³n Demo permite registrar como mÃ¡ximo 1 Worker o integraciÃ³n.',
+                    1;
+            END;
+
+            INSERT INTO dbo.DemoWorkerRegistrations
+            (
+                WorkerId
+            )
+            VALUES
+            (
+                @WorkerId
+            );
+        END;
+
+        COMMIT TRANSACTION;
+    END TRY
+    BEGIN CATCH
+        IF @@TRANCOUNT > 0
+        BEGIN
+            ROLLBACK TRANSACTION;
+        END;
+
+        THROW;
+    END CATCH;
+END;
+GO
+
+/* VerificaciÃ³n inicial. */
+EXEC dbo.sp_ProductAccess_GetDemoStatus;
+GO
+
+/* ===== END FILE: 008_AddDemoRestrictions.sql ===== */
+GO

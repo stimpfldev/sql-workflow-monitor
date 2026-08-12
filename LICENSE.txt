@@ -1,0 +1,19 @@
+PROPRIETARY SOFTWARE NOTICE
+
+Copyright (c) 2026 Federico Stimpfl.
+All rights reserved.
+
+This software, its source code, database scripts,
+documentation, architecture, and associated materials
+are proprietary and confidential.
+
+No permission is granted to copy, modify, distribute,
+publish, sublicense, sell, reverse engineer, or use this
+software or any substantial portion of it without prior
+written authorization from the copyright owner.
+
+Access to this repository or possession of a copy does not
+grant any license or ownership rights.
+
+For licensing or commercial inquiries, contact the
+copyright owner.

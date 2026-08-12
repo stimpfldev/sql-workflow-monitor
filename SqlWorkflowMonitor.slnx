@@ -1,0 +1,15 @@
+<Solution>
+  <Folder Name="/Legal/">
+    <File Path="EULA-ES.txt" />
+    <File Path="Legal/EULA-EN.txt" />
+    <File Path="Legal/packages.json" />
+    <File Path="Legal/THIRD-PARTY-NOTICES.txt" />
+  </Folder>
+  <Folder Name="/Solution Items/">
+    <File Path="AUTHORSHIP.md" />
+    <File Path="LICENSE.txt" />
+    <File Path="README.md" />
+  </Folder>
+  <Project Path="SqlWorkflowMonitor.Worker/SqlWorkflowMonitor.Worker.csproj" Id="6298ba48-88f4-4827-b72a-8624194a8366" />
+  <Project Path="SqlWorkflowMonitor/SqlWorkflowMonitor.csproj" />
+</Solution>

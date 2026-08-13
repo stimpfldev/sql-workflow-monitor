@@ -1,0 +1,831 @@
+@model SqlWorkflowMonitor.ViewModels.ExecutionMonitorViewModel
+@using SqlWorkflowMonitor.Helpers
+@using System.Globalization
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["PageTitle"];
+
+    bool isSpanish = CultureInfo.CurrentUICulture
+        .TwoLetterISOLanguageName
+        .Equals("es", StringComparison.OrdinalIgnoreCase);
+
+    string dateInputLanguage = isSpanish ? "es-AR" : "en-US";
+    string dateDisplayFormat = isSpanish ? "dd/MM/yyyy" : "MM/dd/yyyy";
+    string dateTimeDisplayFormat = isSpanish
+        ? "dd/MM/yyyy HH:mm:ss"
+        : "MM/dd/yyyy HH:mm:ss";
+    string datePlaceholder = isSpanish ? "DD/MM/AAAA" : "MM/DD/YYYY";
+
+    string GetNextSortDirection(string columnName)
+    {
+        bool isCurrentColumn =
+            Model.SortBy.Equals(
+                columnName,
+                StringComparison.OrdinalIgnoreCase);
+
+        bool isAscending =
+            Model.SortDirection.Equals(
+                "ASC",
+                StringComparison.OrdinalIgnoreCase);
+
+        return isCurrentColumn && isAscending
+            ? "DESC"
+            : "ASC";
+    }
+
+    string GetSortIndicator(string columnName)
+    {
+        if (!Model.SortBy.Equals(
+                columnName,
+                StringComparison.OrdinalIgnoreCase))
+        {
+            return string.Empty;
+        }
+
+        return Model.SortDirection.Equals(
+            "ASC",
+            StringComparison.OrdinalIgnoreCase)
+                ? " ↑"
+                : " ↓";
+    }
+
+    string GetSortLabel(string label, string columnName)
+    {
+        return $"{label}{GetSortIndicator(columnName)}";
+    }
+}
+
+<div class="dashboard-heading d-flex justify-content-between align-items-center gap-3 mb-4">
+    <div class="dashboard-heading-copy">
+        <h1 class="dashboard-title mb-1">@Localizer["PageTitle"]</h1>
+
+        <p class="dashboard-subtitle mb-0">
+            @Localizer["PageSubtitle"]
+        </p>
+    </div>
+
+    <a class="btn btn-primary refresh-button"
+       href="/executions">
+        <svg viewBox="0 0 24 24"
+             fill="none"
+             stroke="currentColor"
+             stroke-width="2"
+             stroke-linecap="round"
+             stroke-linejoin="round"
+             aria-hidden="true">
+            <path d="M20 11a8 8 0 1 0-2.3 5.7"></path>
+            <path d="M20 4v7h-7"></path>
+        </svg>
+
+        @Localizer["Refresh"]
+    </a>
+</div>
+
+<!-- ESTADO DE LA EDICIÓN DEMO -->
+<!-- ESTADO DEL ACCESO AL PRODUCTO -->
+
+<div class="alert demo-status @(Model.ProductAccess.IsExpired ||
+                                    Model.ProductAccess.IsInvalidLicense
+                                        ? "alert-danger"
+                                        : "alert-warning") shadow-sm mb-4">
+
+    <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+        <div>
+            <span class="badge bg-primary">
+                @Model.ProductAccess.Edition
+            </span>
+
+            <strong>
+                @if (Model.ProductAccess.IsInvalidLicense)
+                {
+                    @Localizer["AccessInvalidTitle"]
+                }
+                else if (Model.ProductAccess.IsExpired)
+                {
+                    @Localizer[
+                        "AccessExpiredTitle",
+                        Model.ProductAccess.Edition]
+                }
+                else if (Model.ProductAccess.IsInGracePeriod)
+                {
+                    @Localizer[
+                        "AccessGraceTitle",
+                        Model.ProductAccess.Edition]
+                }
+                else
+                {
+                    @Localizer[
+                        "AccessActiveTitle",
+                        Model.ProductAccess.Edition]
+                }
+            </strong>
+        </div>
+
+        <span class="fw-semibold">
+            @if (Model.ProductAccess.IsInvalidLicense)
+            {
+                @Localizer["LicenseInvalidReadOnly"]
+            }
+            else if (Model.ProductAccess.IsExpired)
+            {
+                @Localizer["AccessExpiredReadOnly"]
+            }
+            else if (Model.ProductAccess.IsInGracePeriod)
+            {
+                @Localizer[
+                    "LicenseGracePeriod",
+                    Model.ProductAccess.DaysRemaining]
+            }
+            else
+            {
+                @Localizer[
+                    "AccessDaysRemaining",
+                    Model.ProductAccess.DaysRemaining]
+            }
+        </span>
+    </div>
+
+    @if (!Model.ProductAccess.IsInvalidLicense &&
+         !Model.ProductAccess.IsExpired)
+    {
+        <div class="mt-2">
+            @Localizer[
+                "AccessExpiresOn",
+                Model.ProductAccess.ExpiresAtUtc
+                    .ToLocalTime()
+                    .ToString("d")]
+        </div>
+    }
+
+    <div class="small mt-1">
+        @Localizer[
+            "AccessUsage",
+            Model.ProductAccess.RegisteredProcesses,
+            Model.ProductAccess.MaxProcesses,
+            Model.ProductAccess.RegisteredWorkers,
+            Model.ProductAccess.MaxWorkers]
+    </div>
+</div>
+
+<!-- RESUMEN -->
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted">
+                    @Localizer["Running"]
+                </div>
+
+                <div class="fs-2 fw-bold">
+                    @Model.RunningCount
+                </div>
+
+                @if (Model.StaleRunningCount > 0)
+                {
+                    <div class="text-danger fw-semibold mt-1">
+                        @Localizer["OverdueCount",
+                            Model.StaleRunningCount]
+                    </div>
+                }
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted">
+                    @Localizer["Succeeded"]
+                </div>
+
+                <div class="fs-2 fw-bold text-success">
+                    @Model.SucceededCount
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted">
+                    @Localizer["Failed"]
+                </div>
+
+                <div class="fs-2 fw-bold text-danger">
+                    @Model.FailedCount
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-3">
+        <div class="card shadow-sm h-100">
+            <div class="card-body">
+                <div class="text-muted">
+                    @Localizer["AverageSuccessfulDuration"]
+                </div>
+
+                <div class="fs-2 fw-bold">
+                    @DurationFormatter.Format(Model.AverageDurationMs)
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@if (Model.StaleRunningCount > 0)
+{
+    <div class="alert alert-danger">
+        @if (Model.StaleRunningCount == 1)
+        {
+            @Localizer["StaleAlertSingular",
+                Model.StaleThresholdMinutes]
+        }
+        else
+        {
+            @Localizer["StaleAlertPlural",
+                Model.StaleRunningCount,
+                Model.StaleThresholdMinutes]
+        }
+    </div>
+}
+@if (!Model.ProductAccess.IsDemo)
+{
+    if (Model.ProductAccess.IsInvalidLicense)
+    {
+        <div class="alert alert-danger mb-4" role="alert">
+            @Localizer["LicenseInvalidReadOnly"]
+        </div>
+    }
+    else if (Model.ProductAccess.IsExpired)
+    {
+        <div class="alert alert-danger mb-4" role="alert">
+            @Localizer["LicenseExpiredReadOnly"]
+        </div>
+    }
+    else if (Model.ProductAccess.IsInGracePeriod)
+    {
+        <div class="alert license-grace-alert mb-4"
+             role="alert">
+            @Localizer[
+                "LicenseGracePeriod",
+                Model.ProductAccess.DaysRemaining]
+        </div>
+    }
+    else if (Model.ProductAccess.IsExpiringSoon)
+    {
+        <div class="alert alert-warning mb-4" role="alert">
+            @Localizer[
+                "LicenseExpiringSoon",
+                Model.ProductAccess.DaysRemaining]
+        </div>
+    }
+}
+<!-- FILTROS -->
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        @Localizer["Filters"]
+    </div>
+
+    <div class="card-body">
+        <form method="get"
+              action="/executions"
+              class="row g-3">
+
+            <input type="hidden"
+                   name="sortBy"
+                   value="@Model.SortBy" />
+
+            <input type="hidden"
+                   name="sortDirection"
+                   value="@Model.SortDirection" />
+
+            <div class="col-md-3">
+                <label class="form-label">
+                    @Localizer["Status"]
+                </label>
+
+                <select name="status" class="form-select">
+                    <option value="">
+                        @Localizer["All"]
+                    </option>
+
+                    <option value="Running"
+                            selected="@(Model.SelectedStatus == "Running"
+                                                                                ? "selected"
+                                                                                : null)">
+                        @Localizer["Running"]
+                    </option>
+
+                    <option value="Succeeded"
+                            selected="@(Model.SelectedStatus == "Succeeded"
+                                                                                ? "selected"
+                                                                                : null)">
+                        @Localizer["Succeeded"]
+                    </option>
+
+                    <option value="Failed"
+                            selected="@(Model.SelectedStatus == "Failed"
+                                                                                ? "selected"
+                                                                                : null)">
+                        @Localizer["Failed"]
+                    </option>
+
+                    <option value="Cancelled"
+                            selected="@(Model.SelectedStatus == "Cancelled"
+                                                                                ? "selected"
+                                                                                : null)">
+                        @Localizer["Cancelled"]
+                    </option>
+                </select>
+            </div>
+
+            <div class="col-md-3">
+                <label class="form-label">
+                    @Localizer["Process"]
+                </label>
+
+                <select name="processId" class="form-select">
+                    <option value="">
+                        @Localizer["All"]
+                    </option>
+
+                    @foreach (var process in Model.Processes)
+                    {
+                        string processName = process.ProcessName switch
+                        {
+                            "Generación de reporte diario" =>
+                                Localizer["DailyReportGeneration"].Value,
+
+                            "Importación de clientes" =>
+                                Localizer["CustomerImport"].Value,
+
+                            _ => process.ProcessName
+                        };
+
+                        <option value="@process.ProcessId"
+                                selected="@(Model.SelectedProcessId == process.ProcessId
+                                                                        ? "selected"
+                                                                        : null)">
+                            @processName
+                        </option>
+                    }
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">
+                    @Localizer["From"]
+                </label>
+
+                <div class="localized-date-picker"
+                     data-culture="@dateInputLanguage"
+                     data-placeholder="@datePlaceholder">
+                    <input type="text"
+                           class="form-control localized-date-display"
+                           value="@Model.DateFrom?.ToString(dateDisplayFormat)"
+                           placeholder="@datePlaceholder"
+                           tabindex="-1"
+                           aria-hidden="true"
+                           readonly />
+
+                    <input type="date"
+                           name="dateFrom"
+                           lang="@dateInputLanguage"
+                           value="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                           class="localized-date-native"
+                           aria-label="@Localizer["From"]" />
+
+                    <svg class="localized-date-icon"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+                        <path d="M16 3v4M8 3v4M3 10h18"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="col-md-2">
+                <label class="form-label">
+                    @Localizer["To"]
+                </label>
+
+                <div class="localized-date-picker"
+                     data-culture="@dateInputLanguage"
+                     data-placeholder="@datePlaceholder">
+                    <input type="text"
+                           class="form-control localized-date-display"
+                           value="@Model.DateTo?.ToString(dateDisplayFormat)"
+                           placeholder="@datePlaceholder"
+                           tabindex="-1"
+                           aria-hidden="true"
+                           readonly />
+
+                    <input type="date"
+                           name="dateTo"
+                           lang="@dateInputLanguage"
+                           value="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                           class="localized-date-native"
+                           aria-label="@Localizer["To"]" />
+
+                    <svg class="localized-date-icon"
+                         viewBox="0 0 24 24"
+                         fill="none"
+                         stroke="currentColor"
+                         stroke-width="2"
+                         stroke-linecap="round"
+                         stroke-linejoin="round"
+                         aria-hidden="true">
+                        <rect x="3" y="5" width="18" height="16" rx="2"></rect>
+                        <path d="M16 3v4M8 3v4M3 10h18"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="col-md-2 d-flex align-items-end gap-2">
+                <button type="submit"
+                        class="btn btn-primary">
+                    @Localizer["Filter"]
+                </button>
+
+                <a class="btn btn-outline-secondary"
+                   asp-controller="ExecutionDashboard"
+                   asp-action="Index"
+                   asp-route-pageNumber="1"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-sortBy="ExecutionId"
+                   asp-route-sortDirection="DESC">
+                    @Localizer["Clear"]
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- TABLA -->
+
+<div class="d-flex justify-content-between align-items-center mb-2">
+    <h2 class="h4 mb-0">
+        @Localizer["Executions"]
+    </h2>
+
+    <div class="d-flex align-items-center gap-3">
+        <a class="btn btn-success btn-sm"
+           asp-controller="ExecutionDashboard"
+           asp-action="ExportCsv"
+           asp-route-status="@Model.SelectedStatus"
+           asp-route-processId="@Model.SelectedProcessId"
+           asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+           asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+           asp-route-sortBy="@Model.SortBy"
+           asp-route-sortDirection="@Model.SortDirection">
+            @Localizer["ExportCsv"]
+        </a>
+
+        <form method="get"
+              action="/executions"
+              class="d-flex align-items-center gap-2">
+
+            <input type="hidden"
+                   name="status"
+                   value="@Model.SelectedStatus" />
+
+            <input type="hidden"
+                   name="processId"
+                   value="@Model.SelectedProcessId" />
+
+            <input type="hidden"
+                   name="dateFrom"
+                   value="@Model.DateFrom?.ToString("yyyy-MM-dd")" />
+
+            <input type="hidden"
+                   name="dateTo"
+                   value="@Model.DateTo?.ToString("yyyy-MM-dd")" />
+
+            <input type="hidden"
+                   name="pageNumber"
+                   value="1" />
+
+            <input type="hidden"
+                   name="sortBy"
+                   value="@Model.SortBy" />
+
+            <input type="hidden"
+                   name="sortDirection"
+                   value="@Model.SortDirection" />
+
+            <label for="pageSize"
+                   class="form-label mb-0">
+                @Localizer["PageSize"]
+            </label>
+
+            <select id="pageSize"
+                    name="pageSize"
+                    class="form-select form-select-sm">
+
+                <option value="10"
+                        selected="@(Model.PageSize == 10 ? "selected" : null)">
+                    10
+                </option>
+
+                <option value="25"
+                        selected="@(Model.PageSize == 25 ? "selected" : null)">
+                    25
+                </option>
+
+                <option value="50"
+                        selected="@(Model.PageSize == 50 ? "selected" : null)">
+                    50
+                </option>
+            </select>
+        </form>
+
+        <span class="badge bg-primary">
+            @Localizer["Total", Model.TotalCount]
+        </span>
+    </div>
+</div>
+
+@if (Model.Executions.Count == 0)
+{
+    <div class="alert alert-info">
+        @Localizer["NoExecutions"]
+    </div>
+}
+else
+{
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>
+                        <a class="text-white text-decoration-none"
+                           asp-action="Index"
+                           asp-route-status="@Model.SelectedStatus"
+                           asp-route-processId="@Model.SelectedProcessId"
+                           asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                           asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                           asp-route-pageNumber="1"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-sortBy="ExecutionId"
+                           asp-route-sortDirection="@GetNextSortDirection("ExecutionId")">
+                            @GetSortLabel("ID", "ExecutionId")
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="text-white text-decoration-none"
+                           asp-action="Index"
+                           asp-route-status="@Model.SelectedStatus"
+                           asp-route-processId="@Model.SelectedProcessId"
+                           asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                           asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                           asp-route-pageNumber="1"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-sortBy="ProcessName"
+                           asp-route-sortDirection="@GetNextSortDirection("ProcessName")">
+                            @GetSortLabel(Localizer["Process"].Value, "ProcessName")
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="text-white text-decoration-none"
+                           asp-action="Index"
+                           asp-route-status="@Model.SelectedStatus"
+                           asp-route-processId="@Model.SelectedProcessId"
+                           asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                           asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                           asp-route-pageNumber="1"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-sortBy="Status"
+                           asp-route-sortDirection="@GetNextSortDirection("Status")">
+                            @GetSortLabel(Localizer["Status"].Value, "Status")
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="text-white text-decoration-none"
+                           asp-action="Index"
+                           asp-route-status="@Model.SelectedStatus"
+                           asp-route-processId="@Model.SelectedProcessId"
+                           asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                           asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                           asp-route-pageNumber="1"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-sortBy="StartedAt"
+                           asp-route-sortDirection="@GetNextSortDirection("StartedAt")">
+                            @GetSortLabel(Localizer["Start"].Value, "StartedAt")
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="d-block text-white text-decoration-none sortable-link"
+                           asp-action="Index"
+                           asp-route-status="@Model.SelectedStatus"
+                           asp-route-processId="@Model.SelectedProcessId"
+                           asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                           asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                           asp-route-pageNumber="1"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-sortBy="FinishedAt"
+                           asp-route-sortDirection="@GetNextSortDirection("FinishedAt")">
+                            @GetSortLabel(Localizer["Finish"].Value, "FinishedAt")
+                        </a>
+                    </th>
+
+                    <th>
+                        <a class="text-white text-decoration-none"
+                           asp-action="Index"
+                           asp-route-status="@Model.SelectedStatus"
+                           asp-route-processId="@Model.SelectedProcessId"
+                           asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                           asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                           asp-route-pageNumber="1"
+                           asp-route-pageSize="@Model.PageSize"
+                           asp-route-sortBy="DurationMs"
+                           asp-route-sortDirection="@GetNextSortDirection("DurationMs")">
+                            @GetSortLabel(Localizer["Duration"].Value, "DurationMs")
+                        </a>
+                    </th>
+
+                    <th></th>
+                </tr>
+            </thead>
+
+            <tbody>
+                @foreach (var execution in Model.Executions)
+                {
+                    string processName = execution.ProcessName switch
+                    {
+                        "Generación de reporte diario" =>
+                            Localizer["DailyReportGeneration"].Value,
+
+                        "Importación de clientes" =>
+                            Localizer["CustomerImport"].Value,
+
+                        _ => execution.ProcessName
+                    };
+
+                    bool isStale =
+                        Model.StaleExecutionIds.Contains(
+                            execution.ExecutionId);
+
+                    string badgeClass;
+
+                    if (isStale)
+                    {
+                        badgeClass = "bg-danger";
+                    }
+                    else
+                    {
+                        badgeClass =
+                            execution.Status.ToLowerInvariant() switch
+                            {
+                                "succeeded" => "bg-success",
+                                "failed" => "bg-danger",
+                                "running" => "bg-warning text-dark",
+                                "cancelled" => "bg-secondary",
+                                _ => "bg-secondary"
+                            };
+                    }
+
+                    string statusText =
+                        isStale
+                            ? Localizer["RunningOverdue"].Value
+                            : execution.Status.ToLowerInvariant() switch
+                            {
+                                "running" => Localizer["Running"].Value,
+                                "succeeded" => Localizer["Succeeded"].Value,
+                                "failed" => Localizer["Failed"].Value,
+                                "cancelled" => Localizer["Cancelled"].Value,
+                                _ => execution.Status
+                            };
+
+                    <tr class="@(isStale ? "table-danger" : null)">
+                        <td>@execution.ExecutionId</td>
+
+                        <td>
+                            <strong>@processName</strong>
+                        </td>
+
+                        <td>
+                            <span class="badge @badgeClass">
+                                @statusText
+                            </span>
+                        </td>
+
+                        <td>
+                            @(DateTime.SpecifyKind(execution.StartedAt, DateTimeKind.Utc)
+                                .ToLocalTime()
+                                .ToString("dd/MM/yyyy  HH:mm:ss"))
+                        </td>
+
+                        <td>
+                            @(execution.FinishedAt.HasValue
+                                ? DateTime.SpecifyKind(execution.FinishedAt.Value, DateTimeKind.Utc)
+                                    .ToLocalTime()
+                                    .ToString("dd/MM/yyyy  HH:mm:ss")
+                                : "-")
+                        </td>
+
+                        <td>
+                            @DurationFormatter.Format(execution.DurationMs)
+                        </td>
+
+                        <td>
+                            <a class="btn btn-sm btn-outline-primary"
+                               href="/executions/@execution.ExecutionId">
+                                @Localizer["ViewDetails"]
+                            </a>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+}
+@if (Model.TotalPages > 1)
+{
+    int startPage = Math.Max(
+        1,
+        Model.PageNumber - 2);
+
+    int endPage = Math.Min(
+        Model.TotalPages,
+        startPage + 4);
+
+    startPage = Math.Max(
+        1,
+        endPage - 4);
+
+    <nav aria-label="@Localizer["Pagination"]">
+        <ul class="pagination justify-content-center mt-4">
+
+            <li class="page-item @(Model.PageNumber == 1 ? "disabled" : null)">
+                <a class="page-link"
+                   asp-controller="ExecutionDashboard"
+                   asp-action="Index"
+                   asp-route-status="@Model.SelectedStatus"
+                   asp-route-processId="@Model.SelectedProcessId"
+                   asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                   asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                   asp-route-pageNumber="@(Model.PageNumber - 1)"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-sortBy="@Model.SortBy"
+                   asp-route-sortDirection="@Model.SortDirection">
+                    @Localizer["Previous"]
+                </a>
+            </li>
+
+            @for (int pageItem = startPage; pageItem <= endPage; pageItem++)
+            {
+                <li class="page-item @(pageItem == Model.PageNumber ? "active" : null)">
+                    <a class="page-link"
+                       asp-controller="ExecutionDashboard"
+                       asp-action="Index"
+                       asp-route-status="@Model.SelectedStatus"
+                       asp-route-processId="@Model.SelectedProcessId"
+                       asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                       asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                       asp-route-pageNumber="@pageItem"
+                       asp-route-pageSize="@Model.PageSize"
+                       asp-route-sortBy="@Model.SortBy"
+                       asp-route-sortDirection="@Model.SortDirection">
+                        @pageItem
+                    </a>
+                </li>
+            }
+
+            <li class="page-item @(Model.PageNumber == Model.TotalPages ? "disabled" : null)">
+                <a class="page-link"
+                   asp-controller="ExecutionDashboard"
+                   asp-action="Index"
+                   asp-route-status="@Model.SelectedStatus"
+                   asp-route-processId="@Model.SelectedProcessId"
+                   asp-route-dateFrom="@Model.DateFrom?.ToString("yyyy-MM-dd")"
+                   asp-route-dateTo="@Model.DateTo?.ToString("yyyy-MM-dd")"
+                   asp-route-pageNumber="@(Model.PageNumber + 1)"
+                   asp-route-pageSize="@Model.PageSize"
+                   asp-route-sortBy="@Model.SortBy"
+                   asp-route-sortDirection="@Model.SortDirection">
+                    @Localizer["Next"]
+                </a>
+            </li>
+
+        </ul>
+    </nav>
+}
+@section Scripts
+{
+    <script src="~/js/executions-index.js"
+            asp-append-version="true"></script>
+}

@@ -1,0 +1,95 @@
+﻿@using System.Globalization
+@model SqlWorkflowMonitor.ViewModels.LoginViewModel
+
+@{
+    bool isSpanish =
+        CultureInfo.CurrentUICulture
+            .TwoLetterISOLanguageName == "es";
+
+    ViewData["Title"] =
+        isSpanish
+            ? "Acceso"
+            : "Login";
+}
+
+<div class="row justify-content-center">
+    <div class="col-12 col-sm-10 col-md-6 col-lg-4">
+
+        <div class="card shadow-sm mt-5">
+            <div class="card-body p-4">
+
+                <h1 class="h4 mb-2">
+                    SqlWorkflowMonitor
+                </h1>
+
+                <p class="text-muted mb-4">
+                    @(isSpanish
+                        ? "Acceso de administrador"
+                        : "Administrator login")
+                </p>
+
+                @if (!string.IsNullOrWhiteSpace(
+                        Model.ErrorMessage))
+                {
+                    <div class="alert alert-danger">
+                        @Model.ErrorMessage
+                    </div>
+                }
+
+                <form method="post"
+                      asp-controller="Account"
+                      asp-action="Login">
+
+                    @Html.AntiForgeryToken()
+
+                    <input asp-for="ReturnUrl"
+                           type="hidden" />
+
+                    <div class="mb-3">
+                        <label asp-for="Username"
+                               class="form-label">
+                            @(isSpanish
+                                ? "Usuario"
+                                : "Username")
+                        </label>
+
+                        <input asp-for="Username"
+                               class="form-control"
+                               autocomplete="username"
+                               autofocus />
+
+                        <span asp-validation-for="Username"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="Password"
+                               class="form-label">
+                            @(isSpanish
+                                ? "Contraseña"
+                                : "Password")
+                        </label>
+
+                        <input asp-for="Password"
+                               class="form-control"
+                               autocomplete="current-password" />
+
+                        <span asp-validation-for="Password"
+                              class="text-danger">
+                        </span>
+                    </div>
+
+                    <button type="submit"
+                            class="btn btn-primary w-100">
+                        @(isSpanish
+                            ? "Ingresar"
+                            : "Sign in")
+                    </button>
+                </form>
+
+            </div>
+        </div>
+
+    </div>
+</div>

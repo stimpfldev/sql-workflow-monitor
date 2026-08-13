@@ -1,0 +1,192 @@
+﻿@model SqlWorkflowMonitor.DTOs.ExecutionDetailDto
+@using SqlWorkflowMonitor.Helpers
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+
+@{
+    ViewData["Title"] = Localizer["PageTitle"];
+
+    var processName = Model.ProcessName switch
+    {
+        "Generación de reporte diario" =>
+            Localizer["DailyReportGeneration"].Value,
+
+        "Importación de clientes" =>
+            Localizer["CustomerImport"].Value,
+
+        _ => Model.ProcessName
+    };
+
+    var statusText = Model.Status.ToLowerInvariant() switch
+    {
+        "running" => Localizer["Running"].Value,
+        "succeeded" => Localizer["Succeeded"].Value,
+        "failed" => Localizer["Failed"].Value,
+        "cancelled" => Localizer["Cancelled"].Value,
+        _ => Model.Status
+    };
+
+    var badgeClass = Model.Status.ToLowerInvariant() switch
+    {
+        "succeeded" => "bg-success",
+        "failed" => "bg-danger",
+        "running" => "bg-warning text-dark",
+        "cancelled" => "bg-secondary",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <div>
+        <h1 class="mb-1">
+            @Localizer["ExecutionTitle", Model.ExecutionId]
+        </h1>
+
+        <p class="text-muted mb-0">
+            @processName
+        </p>
+    </div>
+
+    <a class="btn btn-outline-secondary"
+       href="/executions">
+        @Localizer["Back"]
+    </a>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        @Localizer["GeneralInformation"]
+    </div>
+
+    <div class="card-body">
+        <dl class="row mb-0">
+            <dt class="col-sm-3">
+                @Localizer["ExecutionId"]
+            </dt>
+            <dd class="col-sm-9">
+                @Model.ExecutionId
+            </dd>
+
+            <dt class="col-sm-3">
+                @Localizer["ProcessId"]
+            </dt>
+            <dd class="col-sm-9">
+                @Model.ProcessId
+            </dd>
+
+            <dt class="col-sm-3">
+                @Localizer["Process"]
+            </dt>
+            <dd class="col-sm-9">
+                @processName
+            </dd>
+
+            <dt class="col-sm-3">
+                @Localizer["Status"]
+            </dt>
+            <dd class="col-sm-9">
+                <span class="badge @badgeClass">
+                    @statusText
+                </span>
+            </dd>
+
+            <dt class="col-sm-3">
+                @Localizer["Start"]
+            </dt>
+            <dd class="col-sm-9">
+                @(DateTime.SpecifyKind(Model.StartedAt, DateTimeKind.Utc)
+                .ToLocalTime()
+                  .ToString("dd/MM/yyyy HH:mm:ss"))
+            </dd>
+
+            <dt class="col-sm-3">
+                @Localizer["Finish"]
+            </dt>
+
+            <dd class="col-sm-9">
+                @(Model.FinishedAt.HasValue
+                    ? DateTime.SpecifyKind(Model.FinishedAt.Value, DateTimeKind.Utc)
+                        .ToLocalTime()
+                        .ToString("dd/MM/yyyy HH:mm:ss")
+                    : "-")
+            </dd>
+
+            <dt class="col-sm-3">
+                @Localizer["Duration"]
+            </dt>
+            <dd class="col-sm-9">
+                @DurationFormatter.Format(Model.DurationMs)
+            </dd>
+        </dl>
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        @Localizer["Error"]
+    </div>
+
+    <div class="card-body">
+        @if (string.IsNullOrWhiteSpace(Model.ErrorMessage))
+        {
+            <span class="text-muted">
+                @Localizer["NoError"]
+            </span>
+        }
+        else
+        {
+            <div class="alert alert-danger mb-0">
+                <pre class="mb-0 text-wrap">@Model.ErrorMessage</pre>
+            </div>
+        }
+    </div>
+</div>
+
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        @Localizer["ProcessingResult"]
+    </div>
+
+    <div class="card-body">
+        <div class="row text-center">
+            <div class="col-md-3">
+                <div class="text-muted">
+                    @Localizer["Total"]
+                </div>
+
+                <div class="fs-3 fw-bold">
+                    @(Model.TotalItems?.ToString() ?? "-")
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="text-muted">
+                    @Localizer["SucceededItems"]
+                </div>
+
+                <div class="fs-3 fw-bold text-success">
+                    @(Model.SucceededItems?.ToString() ?? "-")
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="text-muted">
+                    @Localizer["FailedItems"]
+                </div>
+
+                <div class="fs-3 fw-bold text-danger">
+                    @(Model.FailedItems?.ToString() ?? "-")
+                </div>
+            </div>
+
+            <div class="col-md-3">
+                <div class="text-muted">
+                    @Localizer["AffectedRows"]
+                </div>
+
+                <div class="fs-3 fw-bold">
+                    @(Model.AffectedRows?.ToString() ?? "-")
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

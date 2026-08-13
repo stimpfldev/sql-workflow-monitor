@@ -1,0 +1,13 @@
+<Project>
+  <PropertyGroup>
+    <Version>1.1.1</Version>
+    <AssemblyVersion>1.1.1.0</AssemblyVersion>
+    <FileVersion>1.1.1.0</FileVersion>
+    <Authors>Federico Stimpfl</Authors>
+    <Company>Federico Stimpfl</Company>
+    <Product>SqlWorkflowMonitor</Product>
+    <RepositoryUrl>https://github.com/stimpfldev/sql-workflow-monitor</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <ContinuousIntegrationBuild Condition="'$(CI)' == 'true'">true</ContinuousIntegrationBuild>
+  </PropertyGroup>
+</Project>

@@ -1,0 +1,50 @@
+name: Bug report
+description: Report a reproducible problem in the public Demo or documentation.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: Do not include passwords, API keys, license files, connection strings, customer data, or production logs. Security issues must follow SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Version
+      placeholder: 1.1.1
+    validations:
+      required: true
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component
+      options:
+        - Web dashboard
+        - REST API
+        - Worker Service
+        - SQL scripts
+        - Installation or documentation
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Reproduction steps
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Sanitized environment details
+      description: Windows and SQL Server versions, deployment mode, and sanitized logs.

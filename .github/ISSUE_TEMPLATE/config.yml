@@ -1,0 +1,10 @@
+﻿blank_issues_enabled: false
+
+contact_links:
+  - name: Security report
+    url: mailto:federicosdev@gmail.com?subject=SqlWorkflowMonitor%20security%20report
+    about: Report suspected vulnerabilities privately.
+
+  - name: Product inquiry
+    url: https://www.federicostimpfl.com.ar
+    about: Contact for product information, licensing, installation, integration, support, or customization.

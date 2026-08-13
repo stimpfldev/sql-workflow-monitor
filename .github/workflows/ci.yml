@@ -1,0 +1,36 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Verify public repository
+        shell: pwsh
+        run: ./scripts/Verify-PublicRepository.ps1
+
+      - name: Restore
+        run: dotnet restore SqlWorkflowMonitor.slnx
+
+      - name: Build
+        run: dotnet build SqlWorkflowMonitor.slnx --configuration Release --no-restore --warnaserror
+
+      - name: Test
+        run: dotnet test SqlWorkflowMonitor.slnx --configuration Release --no-build --no-restore --logger "console;verbosity=normal"

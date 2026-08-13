@@ -1,0 +1,166 @@
+@using System.Globalization
+@inject Microsoft.AspNetCore.Mvc.Localization.IViewLocalizer Localizer
+
+@{
+    var currentCulture = CultureInfo.CurrentUICulture.Name;
+    var returnUrl =
+        $"{Context.Request.Path}{Context.Request.QueryString}";
+}
+
+<!DOCTYPE html>
+<html lang="@CultureInfo.CurrentUICulture.TwoLetterISOLanguageName">
+<head>
+    <meta charset="utf-8" />
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0" />
+
+    <title>@ViewData["Title"] - SqlWorkflowMonitor</title>
+
+
+    <link rel="stylesheet"
+          href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
+    <link rel="stylesheet"
+          href="~/css/site-dashboard-compact.css"
+          asp-append-version="true" />
+
+    <link rel="stylesheet"
+          href="~/SqlWorkflowMonitor.styles.css"
+          asp-append-version="true" />
+</head>
+
+<body>
+    <header>
+        <nav class="navbar navbar-expand-sm app-navbar">
+            <div class="container app-shell">
+
+                <a class="navbar-brand"
+                   href="/executions">
+
+                    <span class="brand-mark"
+                          aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </span>
+
+                    <span>SqlWorkflowMonitor</span>
+                </a>
+
+                <button class="navbar-toggler"
+                        type="button"
+                        data-bs-toggle="collapse"
+                        data-bs-target=".navbar-collapse"
+                        aria-controls="navbarSupportedContent"
+                        aria-expanded="false"
+                        aria-label="@Localizer["ToggleNavigation"]">
+
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+
+                <div class="navbar-collapse collapse justify-content-end">
+
+                    <div class="language-switcher"
+                         aria-label="Language">
+
+                        <form asp-controller="Language"
+                              asp-action="SetLanguage"
+                              method="post"
+                              class="m-0">
+
+                            <input type="hidden"
+                                   name="culture"
+                                   value="es-AR" />
+
+                            <input type="hidden"
+                                   name="returnUrl"
+                                   value="@returnUrl" />
+
+                            <button type="submit"
+                                    class="language-option @(currentCulture == "es-AR"
+                                                                        ? "active"
+                                                                        : null)"
+                                    aria-pressed="@(currentCulture == "es-AR"
+                                                                        ? "true"
+                                                                        : "false")">
+                                ES
+                            </button>
+                        </form>
+
+                        <form asp-controller="Language"
+                              asp-action="SetLanguage"
+                              method="post"
+                              class="m-0">
+
+                            <input type="hidden"
+                                   name="culture"
+                                   value="en-US" />
+
+                            <input type="hidden"
+                                   name="returnUrl"
+                                   value="@returnUrl" />
+
+                            <button type="submit"
+                                    class="language-option @(currentCulture == "en-US"
+                                                                        ? "active"
+                                                                        : null)"
+                                    aria-pressed="@(currentCulture == "en-US"
+                                                                        ? "true"
+                                                                        : "false")">
+                                EN
+                            </button>
+                        </form>
+
+                    </div>
+
+                    @if (User.Identity?.IsAuthenticated == true)
+                    {
+                        <form asp-controller="Account"
+                              asp-action="Logout"
+                              method="post"
+                              class="ms-3">
+
+                            @Html.AntiForgeryToken()
+
+                            <button type="submit"
+                                    class="btn btn-sm btn-outline-secondary">
+
+                                @(CultureInfo.CurrentUICulture
+                                    .TwoLetterISOLanguageName == "es"
+                                        ? "Cerrar sesión"
+                                        : "Sign out")
+                            </button>
+                        </form>
+                    }
+
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <div class="container app-shell app-content">
+        <main role="main"
+              class="pb-3">
+
+            @RenderBody()
+        </main>
+    </div>
+
+    <footer class="border-top footer text-muted">
+        <div class="container app-shell">
+            &copy; 2026 SqlWorkflowMonitor
+        </div>
+    </footer>
+
+    <script src="~/lib/jquery/dist/jquery.min.js"></script>
+
+    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js">
+    </script>
+
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false)
+</body>
+</html>

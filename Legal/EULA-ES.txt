@@ -1,0 +1,457 @@
+ACUERDO DE LICENCIA DE USUARIO FINAL
+SQLWORKFLOWMONITOR
+
+Versión del documento: 1.1
+Producto: SqlWorkflowMonitor
+Titular: Federico Stimpfl
+Copyright © 2026 Federico Stimpfl. Todos los derechos reservados.
+
+IMPORTANTE
+
+Este Acuerdo de Licencia de Usuario Final, en adelante el “Acuerdo”, regula
+la instalación y utilización del software SqlWorkflowMonitor, en adelante
+el “Software”.
+
+Al instalar, copiar, activar o utilizar el Software, la persona humana o
+jurídica que lo adquiere, instala o utiliza, en adelante el “Licenciatario”,
+declara haber leído y aceptado este Acuerdo.
+
+Si el Licenciatario no acepta sus condiciones, no debe instalar ni utilizar
+el Software.
+
+
+1. TITULARIDAD
+
+SqlWorkflowMonitor es un software propietario desarrollado y perteneciente
+a Federico Stimpfl, en adelante el “Licenciante”.
+
+El Software se entrega bajo licencia de uso. No se vende ni se transfiere
+su propiedad intelectual.
+
+Todos los derechos que no sean concedidos expresamente por este Acuerdo
+permanecen reservados al Licenciante.
+
+
+2. CONCESIÓN DE LA LICENCIA
+
+Sujeto al cumplimiento de este Acuerdo y de las condiciones comerciales
+aplicables, el Licenciante concede al Licenciatario una licencia limitada,
+no exclusiva, no transferible y revocable para instalar y utilizar el
+Software exclusivamente para sus operaciones internas.
+
+La licencia no autoriza al Licenciatario a explotar comercialmente el
+Software, redistribuirlo, sublicenciarlo ni ponerlo a disposición de
+terceros, salvo autorización previa y escrita del Licenciante.
+
+
+3. EDICIONES DEL SOFTWARE
+
+SqlWorkflowMonitor puede distribuirse bajo las siguientes ediciones:
+
+3.1. Edición Demo
+
+La edición Demo permite evaluar el Software durante un período de treinta
+(30) días desde su activación o instalación inicial.
+
+Salvo que se indique expresamente otra configuración, la Demo permite:
+
+- monitorear hasta tres (3) procesos distintos;
+- registrar un (1) Worker o integración;
+- utilizar una (1) instalación;
+- consultar el dashboard, la API y el historial;
+- exportar información en formato CSV.
+
+Una vez vencido el período de evaluación, el Software puede continuar
+disponible en modo de solo lectura.
+
+En modo de solo lectura se podrá consultar el historial existente y utilizar
+las funciones expresamente habilitadas, pero no se podrán registrar nuevas
+ejecuciones.
+
+La expiración de la Demo no debe detener ni modificar los procesos propios
+del Licenciatario. Solamente impide que SqlWorkflowMonitor registre nuevas
+ejecuciones.
+
+3.2. Edición Professional
+
+La edición Professional se concede por el plazo y las condiciones indicadas
+en la propuesta comercial, factura, orden de compra o documento de licencia
+correspondiente.
+
+Salvo que se acuerde otra capacidad por escrito, permite:
+
+- monitorear hasta veinticinco (25) procesos;
+- registrar hasta cinco (5) Workers o integraciones;
+- una (1) instalación productiva;
+- una (1) instalación de prueba;
+- utilizar las funciones incluidas en el archivo de licencia.
+
+3.3. Edición Enterprise
+
+La edición Enterprise permite las capacidades, instalaciones, servicios de
+soporte, onboarding y personalizaciones especificadas en la propuesta
+comercial o contrato correspondiente.
+
+La denominación Enterprise no implica que existan funciones adicionales no
+descriptas expresamente en la documentación comercial acordada.
+
+
+4. ARCHIVO DE LICENCIA
+
+Las ediciones comerciales utilizan un archivo de licencia firmado
+digitalmente.
+
+El archivo de licencia puede incluir, entre otros datos:
+
+- identificación del producto;
+- identificación de la licencia;
+- cliente autorizado;
+- edición;
+- InstallationId;
+- fecha de emisión;
+- fecha de vencimiento;
+- capacidad máxima de procesos;
+- capacidad máxima de Workers;
+- funciones habilitadas.
+
+El archivo de licencia debe utilizarse solamente en la instalación para la
+cual fue emitido.
+
+La copia, modificación, adulteración, reemplazo no autorizado o manipulación
+del archivo de licencia puede provocar que el Software lo considere
+inválido.
+
+
+5. INSTALLATION ID
+
+Cada instalación puede generar un identificador único denominado
+InstallationId.
+
+El InstallationId se utiliza para vincular la instalación con el archivo de
+licencia correspondiente.
+
+El Licenciatario podrá entregar ese identificador al Licenciante para
+solicitar la emisión o renovación de una licencia.
+
+El InstallationId no constituye por sí mismo una contraseña ni contiene la
+clave privada utilizada para firmar las licencias.
+
+
+6. VIGENCIA, RENOVACIÓN Y PERÍODO DE GRACIA
+
+Las licencias comerciales tendrán la duración establecida en la documentación
+comercial correspondiente.
+
+El Software podrá mostrar advertencias cuando una licencia se encuentre
+próxima a vencer.
+
+Salvo que se establezca otra condición por escrito, una licencia comercial
+vencida podrá disponer de un período de gracia de catorce (14) días.
+
+Durante el período de gracia, el Software podrá continuar registrando y
+consultando ejecuciones.
+
+Finalizado el período de gracia, el Software podrá pasar a modo de solo
+lectura hasta que se instale una licencia válida.
+
+La renovación se realiza mediante el reemplazo del archivo de licencia y no
+requiere necesariamente la reinstalación del Software.
+
+
+7. RESTRICCIONES DE USO
+
+El Licenciatario no podrá, salvo autorización previa y escrita del
+Licenciante o cuando una norma imperativa lo permita:
+
+a) copiar el Software, excepto las copias de respaldo razonablemente
+necesarias;
+
+b) vender, alquilar, sublicenciar, prestar, distribuir o transferir el
+Software;
+
+c) permitir el uso del Software por organizaciones no incluidas en la
+licencia;
+
+d) eliminar o alterar avisos de autoría, marcas, identificaciones de versión
+o información de licencia;
+
+e) modificar, eludir o neutralizar los controles de licencia, capacidad,
+vencimiento o InstallationId;
+
+f) obtener, utilizar, divulgar o intentar obtener las claves privadas
+empleadas para firmar licencias;
+
+g) realizar ingeniería inversa, descompilar o desensamblar el Software,
+excepto en la medida en que una norma imperativa reconozca expresamente ese
+derecho;
+
+h) utilizar el Software para desarrollar, ofrecer o distribuir un producto
+que copie sustancialmente su funcionamiento propietario;
+
+i) utilizar el Software para actividades ilícitas o para vulnerar derechos
+de terceros.
+
+
+8. INSTALACIÓN Y CONFIGURACIÓN
+
+El Licenciatario es responsable de:
+
+- disponer de una versión compatible de Windows;
+- disponer de una instancia compatible de SQL Server;
+- configurar correctamente las cadenas de conexión;
+- configurar cuentas de servicio y permisos;
+- proteger contraseñas, credenciales y archivos de configuración;
+- configurar firewall, red, certificados y acceso remoto;
+- ejecutar los scripts de base de datos;
+- realizar copias de seguridad;
+- verificar el funcionamiento antes de utilizar el Software en producción.
+
+El Software se distribuye sin incluir SQL Server, licencias de Windows,
+infraestructura, certificados, hardware ni servicios de terceros.
+
+
+9. DATOS DEL LICENCIATARIO
+
+SqlWorkflowMonitor registra información técnica relacionada con procesos y
+ejecuciones, como estados, fechas, duración, métricas y mensajes de error.
+
+El Licenciatario es responsable de determinar qué información envía o
+almacena en el Software.
+
+El Licenciatario no debe registrar contraseñas, secretos, datos financieros,
+información confidencial innecesaria ni datos personales sensibles dentro
+de mensajes de error o campos de diagnóstico.
+
+El Licenciatario es responsable de aplicar las políticas de seguridad,
+retención, respaldo, acceso y protección de datos que correspondan a su
+actividad y jurisdicción.
+
+
+10. SOFTWARE Y COMPONENTES DE TERCEROS
+
+El Software puede incorporar componentes, bibliotecas o herramientas de
+terceros sujetos a sus propias licencias.
+
+Esos componentes continúan perteneciendo a sus respectivos titulares.
+
+Las licencias y avisos aplicables se identificarán, cuando corresponda, en
+el archivo THIRD-PARTY-NOTICES.txt incluido en la distribución.
+
+
+11. ACTUALIZACIONES
+
+El Licenciante podrá ofrecer correcciones, mejoras o nuevas versiones del
+Software.
+
+La existencia de una licencia no implica acceso automático a todas las
+versiones futuras, salvo que la propuesta comercial, el contrato de soporte
+o la documentación de licencia establezcan expresamente lo contrario.
+
+Las actualizaciones pueden requerir:
+
+- copia de seguridad previa;
+- ejecución de scripts de actualización;
+- detención temporal de servicios;
+- actualización de configuración;
+- validación funcional posterior.
+
+
+12. SOPORTE
+
+El soporte incluido será exclusivamente el indicado en la propuesta
+comercial o contrato correspondiente.
+
+Salvo acuerdo escrito, la adquisición de una licencia no incluye:
+
+- soporte permanente o ilimitado;
+- disponibilidad durante las veinticuatro horas;
+- tiempos de respuesta garantizados;
+- administración de infraestructura del Licenciatario;
+- modificaciones personalizadas;
+- recuperación de datos;
+- soporte sobre componentes de terceros.
+
+Las condiciones de soporte podrán documentarse en un acuerdo independiente.
+
+
+13. COPIAS DE SEGURIDAD
+
+Antes de instalar, actualizar, configurar o desinstalar el Software, el
+Licenciatario debe realizar copias de seguridad adecuadas de:
+
+- la base de datos;
+- los archivos de configuración;
+- los archivos de licencia;
+- cualquier otra información necesaria para restaurar el servicio.
+
+El Licenciante no administra ni controla las copias de seguridad realizadas
+por el Licenciatario.
+
+
+14. GARANTÍA LIMITADA
+
+El Software se proporciona conforme a su documentación y a las condiciones
+comerciales acordadas.
+
+El Licenciante no garantiza que el Software:
+
+- funcione sin interrupciones;
+- esté completamente libre de defectos;
+- sea compatible con toda infraestructura;
+- detecte todos los errores de los procesos monitoreados;
+- sustituya los controles operativos, de seguridad o auditoría del
+Licenciatario;
+- evite pérdidas de datos, incidentes o fallas de sistemas externos.
+
+La edición Demo se entrega con fines de evaluación y debe ser validada por el
+Licenciatario antes de cualquier utilización productiva.
+
+Nada de lo establecido en este Acuerdo excluye garantías o responsabilidades
+que no puedan limitarse legalmente.
+
+
+15. LIMITACIÓN DE RESPONSABILIDAD
+
+En la máxima medida permitida por la legislación aplicable, el Licenciante
+no será responsable por daños indirectos, pérdida de ganancias, pérdida de
+oportunidades, interrupción del negocio, pérdida de datos o fallas de
+sistemas de terceros derivadas del uso o imposibilidad de uso del Software.
+
+Cuando legalmente sea admisible limitar la responsabilidad, la
+responsabilidad total del Licenciante no excederá el importe efectivamente
+pagado por la licencia durante los doce (12) meses anteriores al hecho que
+origine el reclamo.
+
+Esta limitación no será aplicable cuando una norma imperativa disponga lo
+contrario ni en casos donde la responsabilidad no pueda ser excluida o
+limitada legalmente.
+
+
+16. SUSPENSIÓN O TERMINACIÓN
+
+El Licenciante podrá suspender o terminar la licencia cuando exista un
+incumplimiento sustancial de este Acuerdo, especialmente en casos de:
+
+- distribución no autorizada;
+- adulteración de licencias;
+- superación deliberada de límites mediante mecanismos no autorizados;
+- utilización de claves o archivos obtenidos ilícitamente;
+- falta de pago de una licencia comercial;
+- violación de derechos de propiedad intelectual.
+
+Cuando el incumplimiento pueda ser subsanado, el Licenciante podrá otorgar
+un plazo razonable para corregirlo.
+
+Al finalizar la licencia, el Licenciatario deberá dejar de utilizar el
+Software, excepto cuando el modo de solo lectura se encuentre expresamente
+habilitado.
+
+
+17. AUDITORÍA DE LICENCIA
+
+Ante indicios razonables de uso no autorizado, el Licenciante podrá solicitar
+información técnica limitada para verificar:
+
+- edición instalada;
+- identificador de instalación;
+- cantidad de instalaciones;
+- límites contratados;
+- estado y vencimiento de la licencia.
+
+La verificación deberá realizarse de forma razonable y evitando el acceso
+innecesario a datos operativos o confidenciales del Licenciatario.
+
+
+18. CONFIDENCIALIDAD
+
+Las claves privadas, herramientas internas de generación de licencias,
+mecanismos no públicos de protección y documentación identificada como
+confidencial pertenecen al Licenciante y no forman parte de la licencia
+concedida.
+
+Cada parte deberá proteger la información confidencial de la otra parte de
+acuerdo con las obligaciones contractuales y legales aplicables.
+
+
+19. CESIÓN
+
+El Licenciatario no podrá ceder este Acuerdo ni transferir la licencia a otra
+persona u organización sin autorización previa y escrita del Licenciante.
+
+Las reorganizaciones empresariales, fusiones, adquisiciones o cambios de
+control podrán requerir la actualización o reemplazo de la licencia.
+
+
+20. INTEGRIDAD DEL ACUERDO
+
+Este Acuerdo, junto con:
+
+- la propuesta comercial;
+- la orden de compra;
+- el archivo de licencia;
+- la política de soporte;
+- la documentación del producto;
+- cualquier contrato firmado entre las partes;
+
+constituye el acuerdo aplicable al uso del Software.
+
+En caso de contradicción, prevalecerá el documento firmado específicamente
+por las partes, salvo respecto de normas legales imperativas.
+
+
+21. NULIDAD PARCIAL
+
+Si alguna disposición de este Acuerdo fuera considerada inválida,
+inaplicable o contraria a una norma imperativa, las restantes disposiciones
+continuarán vigentes en la medida legalmente posible.
+
+La disposición afectada deberá interpretarse o reemplazarse por una
+disposición válida que preserve razonablemente su finalidad.
+
+
+22. LEY APLICABLE Y JURISDICCIÓN
+
+Este Acuerdo se regirá por las leyes de la República Argentina.
+
+Salvo que una norma imperativa establezca otra competencia, cualquier
+controversia será sometida a los tribunales ordinarios competentes de la
+Ciudad Autónoma de Buenos Aires, República Argentina.
+
+Las partes podrán acordar previamente mecanismos de negociación, mediación
+o resolución alternativa de conflictos.
+
+
+23. MODIFICACIONES
+
+El Licenciante podrá actualizar este Acuerdo para futuras versiones,
+renovaciones o nuevas contrataciones.
+
+Las modificaciones no se aplicarán retroactivamente a una licencia vigente,
+salvo aceptación expresa del Licenciatario o cuando sean necesarias para
+cumplir una norma obligatoria.
+
+
+24. CONTACTO
+
+Titular:
+Federico Stimpfl
+
+Producto:
+SqlWorkflowMonitor
+
+Correo de soporte o contacto:
+federicosdev@gmail.com
+
+Sitio web:
+https://www.federicostimpfl.com.ar
+
+
+25. ACEPTACIÓN
+
+La instalación, activación o utilización del Software implica la aceptación
+de este Acuerdo por parte del Licenciatario.
+
+Fecha de última actualización:
+5 de agosto de 2026
+
+FIN DEL ACUERDO

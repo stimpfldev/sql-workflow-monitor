@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+	</resheader>
+
+	<data name="PageTitle" xml:space="preserve">
+    <value>Detalle de ejecución</value>
+  </data>
+	<data name="ExecutionTitle" xml:space="preserve">
+    <value>Ejecución #{0}</value>
+  </data>
+	<data name="Back" xml:space="preserve">
+    <value>Volver</value>
+  </data>
+	<data name="GeneralInformation" xml:space="preserve">
+    <value>Información general</value>
+  </data>
+	<data name="Process" xml:space="preserve">
+    <value>Proceso</value>
+  </data>
+	<data name="Status" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+	<data name="Start" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+	<data name="Finish" xml:space="preserve">
+    <value>Finalización</value>
+  </data>
+	<data name="Duration" xml:space="preserve">
+    <value>Duración</value>
+  </data>
+	<data name="Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+	<data name="NoError" xml:space="preserve">
+    <value>La ejecución no tiene un error registrado.</value>
+  </data>
+	<data name="ProcessingResult" xml:space="preserve">
+    <value>Resultado del procesamiento</value>
+  </data>
+	<data name="Total" xml:space="preserve">
+    <value>Total</value>
+  </data>
+	<data name="SucceededItems" xml:space="preserve">
+    <value>Correctos</value>
+  </data>
+	<data name="FailedItems" xml:space="preserve">
+    <value>Incorrectos</value>
+  </data>
+	<data name="AffectedRows" xml:space="preserve">
+    <value>Filas afectadas</value>
+  </data>
+	<data name="Running" xml:space="preserve">
+    <value>En ejecución</value>
+  </data>
+	<data name="Succeeded" xml:space="preserve">
+    <value>Exitosa</value>
+  </data>
+	<data name="Failed" xml:space="preserve">
+    <value>Fallida</value>
+  </data>
+	<data name="Cancelled" xml:space="preserve">
+    <value>Cancelada</value>
+  </data>
+	<data name="DailyReportGeneration" xml:space="preserve">
+    <value>Generación de reporte diario</value>
+  </data>
+	<data name="CustomerImport" xml:space="preserve">
+    <value>Importación de clientes</value>
+  </data>
+	<data name="DateTimeFormat" xml:space="preserve">
+    <value>dd/MM/yyyy HH:mm:ss</value>
+  </data>
+	<data name="ExecutionId" xml:space="preserve">
+    <value>ID de ejecución</value>
+  </data>
+
+	<data name="ProcessId" xml:space="preserve">
+    <value>ID de proceso</value>
+  </data>
+</root>

@@ -1,0 +1,50 @@
+@baseUrl = https://localhost:7072
+@apiKey = REPLACE_WITH_A_32_CHARACTER_MINIMUM_API_KEY
+@processId = 1
+@workerId = CustomerCsvWorker
+@executionId = 1
+
+### Health check (public)
+GET {{baseUrl}}/api/health
+Accept: application/json
+
+### List executions
+GET {{baseUrl}}/api/executions
+Accept: application/json
+X-Api-Key: {{apiKey}}
+
+### Start execution
+POST {{baseUrl}}/api/executions/start
+Content-Type: application/json
+Accept: application/json
+X-Api-Key: {{apiKey}}
+
+{
+  "processId": {{processId}},
+  "workerId": "{{workerId}}"
+}
+
+### Finish execution
+POST {{baseUrl}}/api/executions/{{executionId}}/finish
+Content-Type: application/json
+Accept: application/json
+X-Api-Key: {{apiKey}}
+
+{
+  "status": "Succeeded",
+  "errorMessage": null,
+  "totalItems": 10,
+  "succeededItems": 10,
+  "failedItems": 0,
+  "affectedRows": 10
+}
+
+### Execution detail
+GET {{baseUrl}}/api/executions/{{executionId}}
+Accept: application/json
+X-Api-Key: {{apiKey}}
+
+### Stuck executions
+GET {{baseUrl}}/api/executions/stuck?olderThanMinutes=30
+Accept: application/json
+X-Api-Key: {{apiKey}}

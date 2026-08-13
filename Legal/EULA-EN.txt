@@ -1,0 +1,446 @@
+END USER LICENSE AGREEMENT
+SQLWORKFLOWMONITOR
+
+Document version: Draft 1.0
+Product: SqlWorkflowMonitor
+Owner: Federico Stimpfl
+Copyright © 2026 Federico Stimpfl. All rights reserved.
+
+IMPORTANT
+
+This End User License Agreement, hereinafter the “Agreement”, governs the
+installation and use of the SqlWorkflowMonitor software, hereinafter the
+“Software”.
+
+By installing, copying, activating, or using the Software, the individual or
+legal entity that acquires, installs, or uses it, hereinafter the “Licensee”,
+acknowledges that it has read and accepted this Agreement.
+
+If the Licensee does not accept these terms, the Licensee must not install or
+use the Software.
+
+
+1. OWNERSHIP
+
+SqlWorkflowMonitor is proprietary software developed and owned by Federico
+Stimpfl, hereinafter the “Licensor”.
+
+The Software is licensed, not sold, and no intellectual-property ownership is
+transferred to the Licensee.
+
+All rights not expressly granted under this Agreement are reserved by the
+Licensor.
+
+
+2. LICENSE GRANT
+
+Subject to compliance with this Agreement and the applicable commercial terms,
+the Licensor grants the Licensee a limited, non-exclusive, non-transferable,
+and revocable license to install and use the Software solely for the
+Licensee’s internal operations.
+
+The license does not authorize the Licensee to commercially exploit,
+redistribute, sublicense, or make the Software available to third parties
+without the Licensor’s prior written authorization.
+
+
+3. SOFTWARE EDITIONS
+
+SqlWorkflowMonitor may be distributed under the following editions:
+
+3.1. Demo Edition
+
+The Demo edition allows the Software to be evaluated for thirty (30) days from
+its initial activation or installation.
+
+Unless expressly configured otherwise, the Demo edition allows the Licensee
+to:
+
+- monitor up to three (3) different processes;
+- register one (1) Worker or integration;
+- use one (1) installation;
+- access the dashboard, API, and execution history;
+- export information in CSV format.
+
+After the evaluation period expires, the Software may remain available in
+read-only mode.
+
+In read-only mode, the Licensee may review existing history and use functions
+that remain expressly enabled, but may not register new executions.
+
+Expiration of the Demo edition must not stop or modify the Licensee’s own
+processes. It only prevents SqlWorkflowMonitor from recording new executions.
+
+3.2. Professional Edition
+
+The Professional edition is granted for the term and under the conditions
+specified in the applicable commercial proposal, invoice, purchase order, or
+license document.
+
+Unless a different capacity is agreed in writing, the Professional edition
+allows the Licensee to:
+
+- monitor up to twenty-five (25) processes;
+- register up to five (5) Workers or integrations;
+- use one (1) production installation;
+- use one (1) test installation;
+- use the features enabled in the license file.
+
+3.3. Enterprise Edition
+
+The Enterprise edition includes the capacities, installations, support
+services, onboarding, and customizations specified in the applicable
+commercial proposal or agreement.
+
+The Enterprise designation does not imply the existence of additional
+features that are not expressly described in the agreed commercial
+documentation.
+
+
+4. LICENSE FILE
+
+Commercial editions use a digitally signed license file.
+
+The license file may include, among other information:
+
+- product identification;
+- license identification;
+- authorized customer;
+- edition;
+- InstallationId;
+- issue date;
+- expiration date;
+- maximum process capacity;
+- maximum Worker capacity;
+- enabled features.
+
+The license file may be used only for the installation for which it was
+issued.
+
+Copying, modifying, tampering with, replacing without authorization, or
+otherwise manipulating the license file may cause the Software to treat it as
+invalid.
+
+
+5. INSTALLATION ID
+
+Each installation may generate a unique identifier known as the
+InstallationId.
+
+The InstallationId is used to bind an installation to its corresponding
+license file.
+
+The Licensee may provide this identifier to the Licensor to request the issue
+or renewal of a license.
+
+The InstallationId is not, by itself, a password and does not contain the
+private key used to sign licenses.
+
+
+6. TERM, RENEWAL, AND GRACE PERIOD
+
+Commercial licenses remain valid for the period established in the applicable
+commercial documentation.
+
+The Software may display warnings when a license is approaching expiration.
+
+Unless a different condition is agreed in writing, an expired commercial
+license may include a fourteen (14) day grace period.
+
+During the grace period, the Software may continue to record and display
+executions.
+
+After the grace period ends, the Software may enter read-only mode until a
+valid license is installed.
+
+Renewal is performed by replacing the license file and does not necessarily
+require reinstalling the Software.
+
+
+7. USE RESTRICTIONS
+
+Except with the Licensor’s prior written authorization or where mandatory law
+expressly permits otherwise, the Licensee may not:
+
+a) copy the Software, except for reasonably necessary backup copies;
+
+b) sell, rent, sublicense, lend, distribute, or transfer the Software;
+
+c) permit use of the Software by organizations not covered by the license;
+
+d) remove or alter authorship notices, trademarks, version identifiers, or
+license information;
+
+e) modify, bypass, disable, or neutralize license, capacity, expiration, or
+InstallationId controls;
+
+f) obtain, use, disclose, or attempt to obtain the private keys used to sign
+licenses;
+
+g) reverse engineer, decompile, or disassemble the Software, except to the
+extent that mandatory law expressly grants such a right;
+
+h) use the Software to develop, offer, or distribute a product that
+substantially copies its proprietary operation;
+
+i) use the Software for unlawful activities or to infringe third-party
+rights.
+
+
+8. INSTALLATION AND CONFIGURATION
+
+The Licensee is responsible for:
+
+- providing a compatible version of Windows;
+- providing a compatible SQL Server instance;
+- correctly configuring connection strings;
+- configuring service accounts and permissions;
+- protecting passwords, credentials, and configuration files;
+- configuring firewalls, networks, certificates, and remote access;
+- executing the database scripts;
+- maintaining backups;
+- verifying operation before using the Software in production.
+
+The Software is distributed without SQL Server, Windows licenses,
+infrastructure, certificates, hardware, or third-party services.
+
+
+9. LICENSEE DATA
+
+SqlWorkflowMonitor records technical information related to processes and
+executions, such as status, dates, duration, metrics, and error messages.
+
+The Licensee is responsible for determining what information is sent to or
+stored in the Software.
+
+The Licensee must not record passwords, secrets, financial information,
+unnecessary confidential information, or sensitive personal data in error
+messages or diagnostic fields.
+
+The Licensee is responsible for applying the security, retention, backup,
+access, and data-protection policies required by its business and
+jurisdiction.
+
+
+10. THIRD-PARTY SOFTWARE AND COMPONENTS
+
+The Software may include third-party components, libraries, or tools subject
+to their own licenses.
+
+Those components remain the property of their respective owners.
+
+Applicable licenses and notices will be identified, when appropriate, in the
+THIRD-PARTY-NOTICES.txt file included with the distribution.
+
+
+11. UPDATES
+
+The Licensor may offer corrections, improvements, or new versions of the
+Software.
+
+The existence of a license does not automatically include access to all future
+versions unless the commercial proposal, support agreement, or license
+documentation expressly provides otherwise.
+
+Updates may require:
+
+- a prior backup;
+- execution of upgrade scripts;
+- temporary service interruption;
+- configuration changes;
+- post-update functional validation.
+
+
+12. SUPPORT
+
+Support is included only to the extent stated in the applicable commercial
+proposal or agreement.
+
+Unless agreed in writing, purchase of a license does not include:
+
+- permanent or unlimited support;
+- twenty-four-hour availability;
+- guaranteed response times;
+- administration of the Licensee’s infrastructure;
+- custom modifications;
+- data recovery;
+- support for third-party components.
+
+Support conditions may be documented in a separate agreement.
+
+
+13. BACKUPS
+
+Before installing, updating, configuring, or uninstalling the Software, the
+Licensee must create adequate backups of:
+
+- the database;
+- configuration files;
+- license files;
+- any other information required to restore the service.
+
+The Licensor does not administer or control backups performed by the
+Licensee.
+
+
+14. LIMITED WARRANTY
+
+The Software is provided in accordance with its documentation and the agreed
+commercial terms.
+
+The Licensor does not warrant that the Software:
+
+- will operate without interruption;
+- will be completely free from defects;
+- will be compatible with every infrastructure;
+- will detect every error in monitored processes;
+- will replace the Licensee’s operational, security, or audit controls;
+- will prevent data loss, incidents, or failures in external systems.
+
+The Demo edition is provided for evaluation and must be validated by the
+Licensee before any production use.
+
+Nothing in this Agreement excludes warranties or liabilities that cannot be
+legally limited.
+
+
+15. LIMITATION OF LIABILITY
+
+To the maximum extent permitted by applicable law, the Licensor will not be
+liable for indirect damages, loss of profits, loss of opportunity, business
+interruption, loss of data, or failures of third-party systems arising from
+the use of or inability to use the Software.
+
+Where limitation of liability is legally permitted, the Licensor’s total
+liability will not exceed the amount actually paid for the license during the
+twelve (12) months preceding the event giving rise to the claim.
+
+This limitation does not apply where mandatory law provides otherwise or
+where liability cannot legally be excluded or limited.
+
+
+16. SUSPENSION OR TERMINATION
+
+The Licensor may suspend or terminate the license in the event of a material
+breach of this Agreement, including:
+
+- unauthorized distribution;
+- license tampering;
+- deliberate circumvention of limits through unauthorized mechanisms;
+- use of keys or files obtained unlawfully;
+- non-payment of a commercial license;
+- infringement of intellectual-property rights.
+
+Where the breach can be remedied, the Licensor may provide a reasonable
+period for correction.
+
+Upon termination of the license, the Licensee must stop using the Software,
+except where read-only mode remains expressly enabled.
+
+
+17. LICENSE AUDIT
+
+Where there are reasonable indications of unauthorized use, the Licensor may
+request limited technical information to verify:
+
+- installed edition;
+- installation identifier;
+- number of installations;
+- contracted limits;
+- license status and expiration.
+
+Verification must be performed reasonably and must avoid unnecessary access
+to the Licensee’s operational or confidential data.
+
+
+18. CONFIDENTIALITY
+
+Private keys, internal license-generation tools, non-public protection
+mechanisms, and documentation identified as confidential belong to the
+Licensor and are not included in the license grant.
+
+Each party must protect the other party’s confidential information in
+accordance with applicable contractual and legal obligations.
+
+
+19. ASSIGNMENT
+
+The Licensee may not assign this Agreement or transfer the license to another
+person or organization without the Licensor’s prior written authorization.
+
+Corporate reorganizations, mergers, acquisitions, or changes of control may
+require the license to be updated or replaced.
+
+
+20. ENTIRE AGREEMENT
+
+This Agreement, together with:
+
+- the commercial proposal;
+- the purchase order;
+- the license file;
+- the support policy;
+- the product documentation;
+- any agreement signed by the parties;
+
+constitutes the agreement applicable to use of the Software.
+
+In the event of a conflict, the document specifically signed by the parties
+will prevail, except with respect to mandatory legal requirements.
+
+
+21. SEVERABILITY
+
+If any provision of this Agreement is found invalid, unenforceable, or
+contrary to mandatory law, the remaining provisions will remain in effect to
+the extent legally possible.
+
+The affected provision must be interpreted or replaced by a valid provision
+that reasonably preserves its intended purpose.
+
+
+22. GOVERNING LAW AND JURISDICTION
+
+This Agreement is governed by the laws of the Argentine Republic.
+
+Unless mandatory law establishes a different jurisdiction, any dispute will
+be submitted to the competent ordinary courts of the Autonomous City of
+Buenos Aires, Argentine Republic.
+
+The parties may previously agree to negotiation, mediation, or other
+alternative dispute-resolution mechanisms.
+
+
+23. AMENDMENTS
+
+The Licensor may update this Agreement for future versions, renewals, or new
+transactions.
+
+Amendments will not apply retroactively to an active license unless expressly
+accepted by the Licensee or required to comply with mandatory law.
+
+
+24. CONTACT
+
+Owner:
+Federico Stimpfl
+
+Product:
+SqlWorkflowMonitor
+
+Support or contact email:
+[TO BE DEFINED]
+
+Website:
+https://www.federicostimpfl.com.ar
+
+
+25. ACCEPTANCE
+
+Installation, activation, or use of the Software constitutes the Licensee’s
+acceptance of this Agreement.
+
+Last updated:
+[TO BE DEFINED]
+
+END OF AGREEMENT

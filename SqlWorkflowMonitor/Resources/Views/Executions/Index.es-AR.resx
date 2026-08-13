@@ -1,0 +1,185 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<root>
+	<resheader name="resmimetype">
+		<value>text/microsoft-resx</value>
+	</resheader>
+	<resheader name="version">
+		<value>2.0</value>
+	</resheader>
+	<resheader name="reader">
+		<value>System.Resources.ResXResourceReader, System.Windows.Forms</value>
+	</resheader>
+	<resheader name="writer">
+		<value>System.Resources.ResXResourceWriter, System.Windows.Forms</value>
+	</resheader>
+
+	<data name="PageTitle" xml:space="preserve">
+    <value>Monitor de ejecuciones</value>
+  </data>
+	<data name="PageSubtitle" xml:space="preserve">
+    <value>Estado de los procesos registrados</value>
+  </data>
+	<data name="Refresh" xml:space="preserve">
+    <value>Actualizar</value>
+  </data>
+	<data name="Running" xml:space="preserve">
+    <value>En ejecución</value>
+  </data>
+	<data name="Succeeded" xml:space="preserve">
+    <value>Exitosa</value>
+  </data>
+	<data name="Failed" xml:space="preserve">
+    <value>Fallida</value>
+  </data>
+	<data name="Cancelled" xml:space="preserve">
+    <value>Cancelada</value>
+  </data>
+	<data name="RunningOverdue" xml:space="preserve">
+    <value>En ejecución atrasada</value>
+  </data>
+	<data name="OverdueCount" xml:space="preserve">
+    <value>Atrasadas: {0}</value>
+  </data>
+	<data name="AverageSuccessfulDuration" xml:space="preserve">
+    <value>Duración promedio exitosa</value>
+  </data>
+	<data name="StaleAlertSingular" xml:space="preserve">
+    <value>Hay 1 ejecución en curso desde hace más de {0} minutos.</value>
+  </data>
+	<data name="StaleAlertPlural" xml:space="preserve">
+    <value>Hay {0} ejecuciones en curso desde hace más de {1} minutos.</value>
+  </data>
+	<data name="Filters" xml:space="preserve">
+    <value>Filtros</value>
+  </data>
+	<data name="Status" xml:space="preserve">
+    <value>Estado</value>
+  </data>
+	<data name="All" xml:space="preserve">
+    <value>Todos</value>
+  </data>
+	<data name="Process" xml:space="preserve">
+    <value>Proceso</value>
+  </data>
+	<data name="From" xml:space="preserve">
+    <value>Desde</value>
+  </data>
+	<data name="To" xml:space="preserve">
+    <value>Hasta</value>
+  </data>
+	<data name="Filter" xml:space="preserve">
+    <value>Filtrar</value>
+  </data>
+	<data name="Clear" xml:space="preserve">
+    <value>Limpiar</value>
+  </data>
+	<data name="Executions" xml:space="preserve">
+    <value>Ejecuciones</value>
+  </data>
+	<data name="Total" xml:space="preserve">
+    <value>Total: {0}</value>
+  </data>
+	<data name="NoExecutions" xml:space="preserve">
+    <value>No hay ejecuciones para los filtros seleccionados.</value>
+  </data>
+	<data name="Start" xml:space="preserve">
+    <value>Inicio</value>
+  </data>
+	<data name="Finish" xml:space="preserve">
+    <value>Finalización</value>
+  </data>
+	<data name="Duration" xml:space="preserve">
+    <value>Duración</value>
+  </data>
+	<data name="ViewDetails" xml:space="preserve">
+    <value>Ver detalle</value>
+  </data>
+	<data name="DailyReportGeneration" xml:space="preserve">
+  <value>Generación de reporte diario</value>
+</data>
+
+	<data name="CustomerImport" xml:space="preserve">
+  <value>Importación de clientes</value>
+</data>
+	<data name="PageSize" xml:space="preserve">
+  <value>Mostrar</value>
+</data>
+
+	<data name="Pagination" xml:space="preserve">
+  <value>Paginación</value>
+</data>
+
+	<data name="Previous" xml:space="preserve">
+  <value>Anterior</value>
+</data>
+
+	<data name="Next" xml:space="preserve">
+  <value>Siguiente</value>
+</data>
+	<data name="ExportCsv" xml:space="preserve">
+    <value>Exportar CSV</value>
+  </data>
+	<data name="DemoActiveTitle" xml:space="preserve">
+    <value>Edición Demo activa</value>
+  </data>
+	<data name="DemoExpiredTitle" xml:space="preserve">
+    <value>Edición Demo vencida</value>
+  </data>
+	<data name="DemoDaysRemaining" xml:space="preserve">
+    <value>Días restantes: {0}</value>
+  </data>
+	<data name="DemoExpiresOn" xml:space="preserve">
+    <value>La Demo vence el {0}. Hasta entonces se pueden iniciar nuevas ejecuciones.</value>
+  </data>
+	<data name="DemoExpiredMessage" xml:space="preserve">
+    <value>La Demo venció. El dashboard, el detalle y la exportación CSV continúan disponibles en modo solo lectura.</value>
+  </data>
+	<data name="DemoUsage" xml:space="preserve">
+    <value>Procesos utilizados: {0}/{1} · Workers utilizados: {2}/{3} · Exportación CSV habilitada</value>
+  </data>
+	<data name="LicenseExpiringSoon" xml:space="preserve">
+  <value>La licencia vence pronto. Quedan {0} días.</value>
+</data>
+
+	<data name="LicenseGracePeriod" xml:space="preserve">
+  <value>La licencia está en período de gracia. Quedan {0} días para renovarla.</value>
+</data>
+
+	<data name="LicenseExpiredReadOnly" xml:space="preserve">
+  <value>La licencia venció y finalizó el período de gracia. El sistema está en modo solo lectura.</value>
+</data>
+
+	<data name="LicenseInvalidReadOnly" xml:space="preserve">
+  <value>La licencia no es válida. El sistema está en modo solo lectura.</value>
+</data>
+	<data name="AccessActiveTitle" xml:space="preserve">
+  <value>Edición {0} activa</value>
+</data>
+
+	<data name="AccessGraceTitle" xml:space="preserve">
+  <value>Edición {0} en período de gracia</value>
+</data>
+
+	<data name="AccessExpiredTitle" xml:space="preserve">
+  <value>Edición {0} vencida</value>
+</data>
+
+	<data name="AccessInvalidTitle" xml:space="preserve">
+  <value>Licencia inválida</value>
+</data>
+
+	<data name="AccessDaysRemaining" xml:space="preserve">
+  <value>El acceso vence en {0} días.</value>
+</data>
+
+	<data name="AccessExpiredReadOnly" xml:space="preserve">
+  <value>El acceso venció. El sistema permanece disponible en modo solo lectura.</value>
+</data>
+	<data name="AccessExpiresOn" xml:space="preserve">
+  <value>El acceso vence el {0}.</value>
+</data>
+
+	<data name="AccessUsage" xml:space="preserve">
+  <value>Procesos registrados: {0} / {1} · Workers registrados: {2} / {3}</value>
+</data>
+</root>

@@ -1,0 +1,48 @@
+@baseUrl = http://localhost:5263
+@processId = 1
+@workerId = CustomerCsvWorker
+@executionId = 36
+
+### 1. Health check
+GET {{baseUrl}}/api/health
+Accept: application/json
+
+### 2. Listar ejecuciones
+GET {{baseUrl}}/api/executions
+Accept: application/json
+
+### 3. Iniciar ejecución
+POST {{baseUrl}}/api/executions/start
+Content-Type: application/json
+Accept: application/json
+
+{
+  "processId": {{processId}},
+  "workerId": "{{workerId}}"
+}
+
+### IMPORTANTE
+### Copiar el executionId devuelto arriba
+### y reemplazar el valor de @executionId.
+
+### 4. Finalizar ejecución exitosamente
+POST {{baseUrl}}/api/executions/{{executionId}}/finish
+Content-Type: application/json
+Accept: application/json
+
+{
+  "status": "Succeeded",
+  "errorMessage": null,
+  "totalItems": 10,
+  "succeededItems": 10,
+  "failedItems": 0,
+  "affectedRows": 10
+}
+
+### 5. Consultar detalle
+GET {{baseUrl}}/api/executions/{{executionId}}
+Accept: application/json
+
+### 6. Consultar ejecuciones trabadas
+GET {{baseUrl}}/api/executions/stuck?olderThanMinutes=30
+Accept: application/json

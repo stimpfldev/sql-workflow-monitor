@@ -255,4 +255,11 @@ app.MapGet(
     "/",
     () => Results.Redirect("/executions"));
 
+app.MapGet(
+    "/robots.txt",
+    () => Results.Text(
+        "User-agent: *\nDisallow: /\n",
+        "text/plain; charset=utf-8"))
+    .ExcludeFromDescription();
+
 app.Run();
